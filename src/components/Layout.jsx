@@ -73,7 +73,7 @@ const Layout = () => {
                 <div className='md:col-span-2 w-full p-4 rounded-xl'>
 
 
-                    <YTPlayer videoId={current?.id || 'EmsRACUM4V4'} autoplay={playlist.length > 0} muted={false} onEnd={handleEnded} />
+                    <YTPlayer videoId={current?.id || 'EmsRACUM4V4'} autoplay={playlist.length > 0} muted={false} nextVideoId={playlist[currentIndex + 1]?.id || null} onEnd={handleEnded} />
                 </div>
 
                 <aside className="w-full">

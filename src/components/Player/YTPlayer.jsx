@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react'
 
-const YTPlayer = ({ videoId = 'EmsRACUM4V4', autoplay = false, muted = false, onEnd, title = 'YouTube player' }) => {
+const YTPlayer = ({ videoId = 'EmsRACUM4V4', autoplay = false, muted = false, nextVideoId = null, onEnd, title = 'YouTube player' }) => {
     const containerRef = useRef(null)
     const playerRef = useRef(null)
     const [ready, setReady] = useState(false)
@@ -61,7 +61,17 @@ const YTPlayer = ({ videoId = 'EmsRACUM4V4', autoplay = false, muted = false, on
                     },
                     onStateChange: (ev) => {
                         try { console.debug('YT player state', ev.data) } catch (e) { }
-                        if (ev.data === (window.YT && window.YT.PlayerState ? window.YT.PlayerState.ENDED : 0) && typeof onEnd === 'function') onEnd()
+                        const ENDED = window.YT && window.YT.PlayerState ? window.YT.PlayerState.ENDED : 0
+                        if (ev.data === ENDED) {
+                            // If a nextVideoId is provided, try to load and play it immediately
+                            try {
+                                if (nextVideoId && ev.target && ev.target.loadVideoById) {
+                                    try { ev.target.loadVideoById(nextVideoId); ev.target.playVideo && ev.target.playVideo() } catch (e) { }
+                                }
+                            } catch (e) { }
+
+                            if (typeof onEnd === 'function') onEnd()
+                        }
                     }
                 }
             })

@@ -60,7 +60,7 @@ const Search = ({ onSelect }) => {
                         placeholder='Search YouTube videos...'
                         className='flex-1 h-8 bg-transparent text-foreground placeholder:text-muted-foreground outline-none px-3'
                     />
-                    <button type='submit' className='bg-amber-400/90 hover:bg-amber-400 text-black font-semibold px-4 py-2 rounded-md ml-2'>
+                    <button type='submit' className='bg-amber-50 hover:bg-amber-100 text-black font-semibold px-4 py-2 rounded-3xl ml-2'>
                         {loading ? 'Searching...' : 'Search'}
                     </button>
                 </div>
