@@ -1,8 +1,11 @@
 import React from 'react'
+import YTPlayer from './components/Player/YTPlayer';
 
 const App = () => {
   return (
-    <div>App</div>
+    <div>
+      <YTPlayer/>
+    </div>
   )
 }
 export default App;
