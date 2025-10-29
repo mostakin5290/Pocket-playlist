@@ -1,7 +1,7 @@
 import React from 'react'
 
-const YTPlayer = () => {
-    const src = `https://www.youtube.com/embed/EmsRACUM4V4?list=RDEmsRACUM4V4&autoplay=0&rel=0`;
+const YTPlayer = ({ videoId = 'EmsRACUM4V4', playlistId = 'RDEmsRACUM4V4' }) => {
+    const src = `https://www.youtube.com/embed/${videoId}?list=${playlistId}&autoplay=0&rel=0`;
 
     return (
         <div>
@@ -22,9 +22,3 @@ const YTPlayer = () => {
 }
 
 export default YTPlayer;
-
-
-
-
-
-// { videoId = 'EmsRACUM4V4', playlistId = 'RDEmsRACUM4V4' }
