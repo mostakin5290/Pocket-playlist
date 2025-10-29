@@ -1,13 +1,15 @@
 import React from 'react'
-import YTPlayer from './components/Player/YTPlayer';
 import Header from './components/Layout/Header';
 import Footer from './components/Layout/Footer';
+import Layout  from './components/Layout';
+import Search from './components/Search';
 
 const App = () => {
   return (
     <div>
       <Header/>
-      <YTPlayer/>
+      <Search/>
+      <Layout/>
       <Footer />
     </div>
   )
