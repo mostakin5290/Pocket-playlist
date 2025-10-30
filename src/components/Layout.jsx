@@ -1,9 +1,20 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import YTPlayer from './Player/YTPlayer'
 
 const Layout = () => {
     const [playlistUrl, setPlaylistUrl] = useState('')
-    const [playlist, setPlaylist] = useState([])
+    const [playlistID, setPlaylistID] = useState(() => localStorage.getItem('currentPlaylistId') || '')
+    const [playlist, setPlaylist] = useState(() => {
+
+        try {
+            const allPlaylist =  JSON.parse(localStorage.getItem('playlists') || '{}')
+            const currentId = localStorage.getItem('currentPlaylistId')
+    
+            return currentId && allPlaylist[currentId] ? allPlaylist[currentId] : []
+        } catch {
+            return []
+        }
+    })
     const [currentIndex, setCurrentIndex] = useState(0)
 
     const current = playlist[currentIndex] || null
@@ -21,6 +32,10 @@ const Layout = () => {
     async function addPlaylist() {
         const id = parsePlaylistId(playlistUrl.trim())
         if (!id) return
+
+        localStorage.setItem('currentPlaylistId', id)
+        setPlaylistID(id)
+
         if (!API_KEY) {
             alert('Set VITE_YT_API in your .env with your YouTube API key')
             return
@@ -31,6 +46,13 @@ const Layout = () => {
             const res = await fetch(url)
             if (!res.ok) throw new Error(await res.text())
             const data = await res.json()
+
+            if (data.error) {
+                console.error('YouTube API Error:', data.error)
+                alert('YouTube API returned an error. Check console for details.')
+                return
+            }
+
             const items = (data.items || []).map(i => ({
                 id: i.snippet.resourceId?.videoId,
                 title: i.snippet.title,
@@ -43,6 +65,10 @@ const Layout = () => {
                 return
             }
 
+            const all = JSON.parse(localStorage.getItem('playlists') || '{}')
+            all[id] = items
+            localStorage.setItem('playlists', JSON.stringify(all))
+            
             setPlaylist(items)
             setCurrentIndex(0)
         } catch (err) {
@@ -64,7 +90,7 @@ const Layout = () => {
         })
     }
 
-    function handleNext() { setCurrentIndex(prev => Math.min(prev + 1, Math.max(0, playlist.length - 1))) }
+    function handleNext() { setCurrentIndex(prev => Math.min(prev + 1, playlist.length - 1)) }
     function handlePrev() { setCurrentIndex(prev => Math.max(prev - 1, 0)) }
 
     return (

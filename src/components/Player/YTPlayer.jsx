@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react'
 
-const YTPlayer = ({ videoId = 'EmsRACUM4V4', autoplay = false, muted = false, nextVideoId = null, onEnd, title = 'YouTube player' }) => {
+const YTPlayer = ({ videoId = 'EmsRACUM4V4', autoplay = true, muted = false, nextVideoId = null, onEnd, title = 'YouTube player' }) => {
     const containerRef = useRef(null)
     const playerRef = useRef(null)
     const [ready, setReady] = useState(false)
