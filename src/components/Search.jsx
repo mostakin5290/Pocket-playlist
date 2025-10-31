@@ -67,18 +67,17 @@ const Search = ({ onSelect }) => {
             </form>
 
             {error && <p className='text-sm text-destructive mt-2'>{error}</p>}
-
-            <div className='w-full max-w-2xl mt-4 grid grid-cols-1 sm:grid-cols-2 gap-3'>
+            <div className=' w-full max-w-2xl mt-4 p-2 grid grid-cols-1 sm:grid-cols-2 gap-1 rounded-lg  absolute z-10'>
                 {results.map(item => (
                     <button
                         key={item.id}
                         onClick={() => handleSelect(item)}
-                        className='flex items-center gap-3 p-2 rounded-lg hover:shadow-md transition-shadow bg-background'
+                        className='flex items-center gap-3 p-2 rounded-lg hover:shadow-md transition-shadow bg-[#333]'
                     >
                         <img src={item.thumbnail} alt={item.title} className='w-28 h-16 object-cover rounded' />
                         <div className='text-left'>
                             <div className='text-sm font-medium'>{item.title}</div>
-                            <div className='text-xs text-muted-foreground'>{item.channel}</div>
+                            
                         </div>
                     </button>
                 ))}
