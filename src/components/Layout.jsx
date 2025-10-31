@@ -3,19 +3,21 @@ import YTPlayer from './Player/YTPlayer'
 
 const Layout = () => {
     const [playlistUrl, setPlaylistUrl] = useState('')
-    const [playlistID, setPlaylistID] = useState(() => localStorage.getItem('currentPlaylistId') || '')
     const [playlist, setPlaylist] = useState(() => {
 
+        const saved =  localStorage.getItem('playlists')
         try {
-            const allPlaylist =  JSON.parse(localStorage.getItem('playlists') || '{}')
-            const currentId = localStorage.getItem('currentPlaylistId')
-    
-            return currentId && allPlaylist[currentId] ? allPlaylist[currentId] : []
+            const parsed = saved ? JSON.parse(saved) : []
+            return Array.isArray(parsed) ? parsed : []
         } catch {
             return []
         }
     })
     const [currentIndex, setCurrentIndex] = useState(0)
+
+    useEffect(() => {
+        localStorage.setItem('playlists', JSON.stringify(playlist))
+    }, [playlist])
 
     const current = playlist[currentIndex] || null
     const API_KEY = import.meta.env.VITE_YT_API || import.meta.env.vite_YT_API
@@ -29,12 +31,15 @@ const Layout = () => {
         }
     }
 
+    const handelReset = () => {
+
+        localStorage.removeItem('playlists')
+        setPlaylist([])
+    }
+
     async function addPlaylist() {
         const id = parsePlaylistId(playlistUrl.trim())
         if (!id) return
-
-        localStorage.setItem('currentPlaylistId', id)
-        setPlaylistID(id)
 
         if (!API_KEY) {
             alert('Set VITE_YT_API in your .env with your YouTube API key')
@@ -64,10 +69,6 @@ const Layout = () => {
                 alert('No videos found in that playlist or playlist is private.')
                 return
             }
-
-            const all = JSON.parse(localStorage.getItem('playlists') || '{}')
-            all[id] = items
-            localStorage.setItem('playlists', JSON.stringify(all))
             
             setPlaylist(items)
             setCurrentIndex(0)
@@ -105,7 +106,10 @@ const Layout = () => {
                 <aside className="w-full">
                     <div className='h-auto md:h-[70vh] w-full border rounded-3xl p-4 bg-card'>
                         <div className="h-full overflow-auto">
-                            <h3 className="text-lg font-semibold mb-2">Add Playlist</h3>
+                            <div className='flex flex-row justify-between'>
+                                <h3 className="text-lg font-semibold mb-2">Add Playlist</h3>
+                                <button onClick={handelReset} className='cursor-pointer'> Reset </button>
+                            </div>
                             <div className='flex gap-2 mb-4'>
                                 <input
                                     value={playlistUrl}
