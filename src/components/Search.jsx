@@ -5,15 +5,10 @@ const Search = ({ onSelect }) => {
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState(null)
 
-    const API_KEY = import.meta.env.VITE_YT_API || import.meta.env.vite_YT_API
+    const API_KEY = import.meta.env.VITE_YT_API
 
     async function searchYouTube(searchTerm) {
         if (!searchTerm) return
-        if (!API_KEY) {
-            setError('Missing YouTube API key. Set VITE_YT_API in .env')
-            return
-        }
-
         setLoading(true)
         setError(null)
         try {
@@ -31,8 +26,7 @@ const Search = ({ onSelect }) => {
 
             setResults(items)
         } catch (err) {
-            console.error('YT search error', err)
-            setError('Search failed. Check console for details.')
+            
         } finally {
             setLoading(false)
         }
@@ -44,9 +38,7 @@ const Search = ({ onSelect }) => {
     }
 
     function handleSelect(item) {
-        console.log('Search select', item)
         if (onSelect) onSelect(item)
-        else console.log('Selected video', item)
     }
 
     return (

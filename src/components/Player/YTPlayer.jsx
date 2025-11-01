@@ -1,9 +1,11 @@
 import React, { useEffect, useRef, useState } from 'react'
 
-const YTPlayer = ({ videoId = 'EmsRACUM4V4', autoplay = true, muted = false, nextVideoId = null, onEnd, title = 'YouTube player' }) => {
+const YTPlayer = ({ videoId = 'EmsRACUM4V4', onEnd = null, title = 'YouTube player' }) => {
     const containerRef = useRef(null)
     const playerRef = useRef(null)
+    const readyRef = useRef(false)
     const [ready, setReady] = useState(false)
+    const onEndRef = useRef(onEnd)
 
     function ensureYT() {
         return new Promise((resolve) => {
@@ -25,10 +27,9 @@ const YTPlayer = ({ videoId = 'EmsRACUM4V4', autoplay = true, muted = false, nex
         })
     }
 
-    const readyRef = useRef(false)
-    const pendingVideoRef = useRef(null)
-
     useEffect(() => {
+        onEndRef.current = onEnd
+
         let mounted = true
         ensureYT().then((YT) => {
             if (!mounted) return
@@ -44,33 +45,18 @@ const YTPlayer = ({ videoId = 'EmsRACUM4V4', autoplay = true, muted = false, nex
                 height: '100%',
                 width: '100%',
                 videoId,
-                playerVars: { autoplay: autoplay ? 1 : 0, playsinline: 1 },
+                playerVars: { playsinline: 1, rel: 0, modestbranding: 1 },
                 events: {
                     onReady: (ev) => {
                         readyRef.current = true
                         setReady(true)
-                        try {
-                            if (muted && ev.target.mute) { try { ev.target.mute() } catch (e) { } }
-                            if (pendingVideoRef.current) {
-                                const vid = pendingVideoRef.current
-                                pendingVideoRef.current = null
-                                ev.target.loadVideoById(vid)
-                                if (autoplay) try { ev.target.playVideo() } catch (e) { }
-                            }
-                        } catch (e) { }
+                        try { ev.target.loadVideoById(videoId); ev.target.playVideo && ev.target.playVideo() } catch (e) { }
                     },
                     onStateChange: (ev) => {
-                        try { console.debug('YT player state', ev.data) } catch (e) { }
                         const ENDED = window.YT && window.YT.PlayerState ? window.YT.PlayerState.ENDED : 0
                         if (ev.data === ENDED) {
-                            // If a nextVideoId is provided, try to load and play it immediately
-                            try {
-                                if (nextVideoId && ev.target && ev.target.loadVideoById) {
-                                    try { ev.target.loadVideoById(nextVideoId); ev.target.playVideo && ev.target.playVideo() } catch (e) { }
-                                }
-                            } catch (e) { }
-
-                            if (typeof onEnd === 'function') onEnd()
+                            const fn = onEndRef.current
+                            if (typeof fn === 'function') fn()
                         }
                     }
                 }
@@ -86,21 +72,10 @@ const YTPlayer = ({ videoId = 'EmsRACUM4V4', autoplay = true, muted = false, nex
     useEffect(() => {
         const p = playerRef.current
         try {
-            if (!p || !readyRef.current) {
-                pendingVideoRef.current = videoId
-                return
-            }
-
-            if (autoplay) {
-                try { if (muted && p.mute) { p.mute() } } catch (e) { }
-                try { p.loadVideoById(videoId); p.playVideo && p.playVideo() } catch (e) { }
-            } else {
-                try { p.cueVideoById(videoId) } catch (e) { }
-                try { if (muted && p.mute) { p.mute() } } catch (e) { }
-            }
+            if (!p || !readyRef.current) return
+            try { p.loadVideoById(videoId); p.playVideo && p.playVideo() } catch (e) { }
         } catch (e) { console.warn('YTPlayer update error', e) }
-    }, [videoId, autoplay, muted])
-
+    }, [videoId])
 
     return (
         <div className="w-full">
