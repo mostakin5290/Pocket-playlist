@@ -17,9 +17,9 @@ const Header = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="relative rounded-3xl overflow-visible flex justify-center">
 
-
           <div className="relative z-10 pointer-events-auto w-full bg-card/80 backdrop-blur-lg border border-border shadow-2xl px-4 sm:px-6 lg:px-8 rounded-3xl">
             <div className="flex items-center justify-between h-16">
+              
               {/* Brand */}
               <div className="flex items-center gap-3">
                 <a href="/" className="flex items-center gap-3">
