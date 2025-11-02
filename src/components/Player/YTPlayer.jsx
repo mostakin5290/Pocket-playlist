@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react'
+import { BorderBeam } from "../ui/border-beam"
 
 const YTPlayer = ({ videoId = 'EmsRACUM4V4', onEnd = null, title = 'YouTube player' }) => {
     const containerRef = useRef(null)
@@ -78,16 +79,30 @@ const YTPlayer = ({ videoId = 'EmsRACUM4V4', onEnd = null, title = 'YouTube play
     }, [videoId])
 
     return (
-        <div className="w-full">
-            <div className="relative w-full rounded-xl overflow-hidden bg-black" style={{ paddingTop: '56.25%' }}>
-                <div ref={containerRef} className="absolute inset-0" aria-label={title}></div>
-                {!ready && (
-                    <div className="absolute inset-0 flex items-center justify-center bg-black/60">
-                        <div className="w-10 h-10 rounded-full border-4 border-t-transparent border-white animate-spin" />
-                    </div>
-                )}
+        <div className="relative  w-full mt-10 rounded-2xl">
+                <div className="relative w-full rounded-2xl overflow-hidden bg-black" style={{ paddingTop: '56.25%' }}>
+                    <div ref={containerRef} className="absolute inset-0" aria-label={title}></div>
+                    {!ready && (
+                        <div className="absolute inset-0 flex items-center justify-center bg-black/60">
+                            <div className="w-10 h-10 rounded-full border-4 border-t-transparent border-white animate-spin" />
+                        </div>
+                    )}
+
+                </div>
+                <BorderBeam
+                    duration={6}
+                    size={400}
+                    className="from-transparent via-red-500 to-transparent"
+                />
+                <BorderBeam
+                    duration={6}
+                    delay={3}
+                    size={400}
+                    borderWidth={2}
+                    className="from-transparent via-blue-500 to-transparent"
+                />
             </div>
-        </div>
+
     )
 }
 

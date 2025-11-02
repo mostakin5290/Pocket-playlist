@@ -1,4 +1,5 @@
-import React, { useState } from 'react'
+import React, { useState, useRef, useEffect } from 'react'
+
 const Search = ({ onSelect }) => {
     const [q, setQ] = useState('')
     const [results, setResults] = useState([])
@@ -26,11 +27,38 @@ const Search = ({ onSelect }) => {
 
             setResults(items)
         } catch (err) {
-            
+            setError(err?.message || 'Search failed')
         } finally {
             setLoading(false)
         }
     }
+
+    // show results when there are items
+    const [showResults, setShowResults] = useState(false)
+    const containerRef = useRef(null)
+
+    useEffect(() => {
+        setShowResults(results && results.length > 0)
+    }, [results])
+
+    // close on outside click or escape
+    useEffect(() => {
+        function onDocClick(e) {
+            if (!containerRef.current) return
+            if (!containerRef.current.contains(e.target)) {
+                setShowResults(false)
+            }
+        }
+        function onKey(e) {
+            if (e.key === 'Escape') setShowResults(false)
+        }
+        document.addEventListener('click', onDocClick)
+        document.addEventListener('keydown', onKey)
+        return () => {
+            document.removeEventListener('click', onDocClick)
+            document.removeEventListener('keydown', onKey)
+        }
+    }, [])
 
     function onSubmit(e) {
         e.preventDefault()
@@ -38,42 +66,53 @@ const Search = ({ onSelect }) => {
     }
 
     function handleSelect(item) {
+        // call prop handler if provided
         if (onSelect) onSelect(item)
+        // dispatch a global event so Layout (or any container) can handle it without prop drilling
+        try {
+            window.dispatchEvent(new CustomEvent('pp:search-select', { detail: item }))
+        } catch (e) { /* ignore */ }
+        // hide results after selection
+        setShowResults(false)
     }
 
     return (
-        <div className='w-full flex flex-col items-center'>
+        <div ref={containerRef} className='w-full flex flex-col items-center relative'>
             <form onSubmit={onSubmit} className='w-full flex items-center justify-center'>
-                <div className='flex items-center p-2 pl-4 pr-1 border border-amber-200/20 w-full max-w-2xl h-12 rounded-full overflow-hidden bg-card'>
+                <div className='flex items-center px-3 py-2 border border-border w-full max-w-2xl rounded-full overflow-hidden bg-[#191622] shadow-md'>
                     <input
                         value={q}
                         onChange={(e) => setQ(e.target.value)}
                         type="text"
                         placeholder='Search YouTube videos...'
-                        className='flex-1 h-8 bg-transparent text-foreground placeholder:text-muted-foreground outline-none px-3'
+                        className='flex-1 h-10 bg-transparent text-foreground placeholder:text-muted-foreground outline-none px-3'
                     />
-                    <button type='submit' className='bg-amber-50 hover:bg-amber-100 text-black font-semibold px-4 py-2 rounded-3xl ml-2'>
+                    <button type='submit' className='ml-3 px-4 py-2 rounded-full font-semibold text-white shadow-sm' style={{ background: 'linear-gradient(90deg,#FF1EA8,#FF56B6)' }}>
                         {loading ? 'Searching...' : 'Search'}
                     </button>
                 </div>
             </form>
 
             {error && <p className='text-sm text-destructive mt-2'>{error}</p>}
-            <div className=' w-full max-w-2xl mt-4 p-2 grid grid-cols-1 sm:grid-cols-2 gap-1 rounded-lg  absolute z-10'>
-                {results.map(item => (
-                    <button
-                        key={item.id}
-                        onClick={() => handleSelect(item)}
-                        className='flex items-center gap-3 p-2 rounded-lg hover:shadow-md transition-shadow bg-[#333]'
-                    >
-                        <img src={item.thumbnail} alt={item.title} className='w-28 h-16 object-cover rounded' />
-                        <div className='text-left'>
-                            <div className='text-sm font-medium'>{item.title}</div>
-                            
-                        </div>
-                    </button>
-                ))}
-            </div>
+
+            {showResults && (
+                <div className='absolute left-1/2 top-full transform -translate-x-1/2 mt-2 w-full max-w-2xl p-2 grid grid-cols-1 gap-2 rounded-lg bg-[#0f0f12] border border-border shadow-2xl z-50 max-h-72 overflow-auto'>
+                    {results.map(item => (
+                        <button
+                            key={item.id}
+                            onClick={() => handleSelect(item)}
+                            className='flex items-center gap-3 p-2 rounded-lg transition-shadow hover:shadow-[0_6px_24px_rgba(255,30,168,0.18)] hover:bg-accent/6 text-left'
+                        >
+                            <img src={item.thumbnail} alt={item.title} className='w-28 h-16 object-cover rounded' />
+                            <div className='flex-1'>
+                                <div className='text-sm font-medium text-foreground'>{item.title}</div>
+                                <div className='text-xs text-muted-foreground mt-1'>{item.channel}</div>
+                            </div>
+                            <div className='text-xs text-muted-foreground'>Play</div>
+                        </button>
+                    ))}
+                </div>
+            )}
         </div>
     )
 }

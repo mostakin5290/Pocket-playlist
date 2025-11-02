@@ -4,9 +4,11 @@ import AudioPlayer from './components/Player/AudioPlayer'
 import { Button } from './components/ui/button'
 import { RefreshCw, Plus } from 'lucide-react'
 import SongList from './components/SongList'
+import Header from './components/Layout/Header'
 
 const Layout = () => {
     const [playlistUrl, setPlaylistUrl] = useState('')
+    const [mode, setMode] = useState('video')
     const [playlist, setPlaylist] = useState(() => {
 
         const saved = localStorage.getItem('playlists')
@@ -165,29 +167,57 @@ const Layout = () => {
         })
     }
 
+    // Listen for header search selections (dispatched by Search component)
+    useEffect(() => {
+        function onSearchSelect(e) {
+            const item = e?.detail
+            if (!item || !item.id) return
+            // If item already in playlist, play it. Otherwise add and play immediately.
+            setPlaylist(prev => {
+                const found = prev.findIndex(p => p.id === item.id)
+                if (found !== -1) {
+                    setCurrentIndex(found)
+                    setOrigin('songs')
+                    return prev
+                }
+                // insert after current index so it becomes the next item, but also play it now
+                const insertAt = Math.min(prev.length, currentIndex + 1)
+                const next = [...prev.slice(0, insertAt), item, ...prev.slice(insertAt)]
+                setCurrentIndex(insertAt)
+                setOrigin('songs')
+                return next
+            })
+        }
+        window.addEventListener('pp:search-select', onSearchSelect)
+        return () => window.removeEventListener('pp:search-select', onSearchSelect)
+    }, [currentIndex])
+
     return (
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8 lg:gap-10">
-                <div className='md:col-span-2 w-full flex gap-9 flex-col p-4 rounded-xl'>
-
-
-                    <AudioPlayer videoId={current?.id || 'EmsRACUM4V4'} onEnd={handleEnded} />
-                    <YTPlayer videoId={current?.id || 'EmsRACUM4V4'} onEnd={handleEnded} />
+        <>
+            <Header mode={mode} setMode={setMode} />
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-25">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8 lg:gap-10">
+                    <div className='md:col-span-2 w-full flex gap-9 flex-col p-4 rounded-xl'>
+                        {mode === 'audio' ? (
+                            <AudioPlayer videoId={current?.id || 'EmsRACUM4V4'} onEnd={handleEnded} />
+                        ) : (
+                            <YTPlayer videoId={current?.id || 'EmsRACUM4V4'} onEnd={handleEnded} />
+                        )}
+                    </div>
+                    <aside className="w-full">
+                        <SongList
+                            playlistUrl={playlistUrl}
+                            setPlaylistUrl={setPlaylistUrl}
+                            handelReset={handelReset}
+                            handleAdd={handleAdd}
+                            playlist={playlist}
+                            currentIndex={currentIndex}
+                            handlePlayIndex={handlePlayIndex}
+                        />
+                    </aside>
                 </div>
-
-                <aside className="w-full">
-                    <SongList
-                        playlistUrl={playlistUrl}
-                        setPlaylistUrl={setPlaylistUrl}
-                        handelReset={handelReset}
-                        handleAdd={handleAdd}
-                        playlist={playlist}
-                        currentIndex={currentIndex}
-                        handlePlayIndex={handlePlayIndex}
-                    />
-                </aside>
             </div>
-        </div>
+        </>
     )
 }
 

@@ -6,11 +6,13 @@ import Search from './components/Search';
 
 const App = () => {
   return (
-    <div>
-      <Header />
-      <Search />
-      <Layout />
-      <Footer />
+    <div className="min-h-screen flex flex-col items-center">
+      {/* center the app content into a max-width container */}
+      <div className="w-full max-w-7xl">
+        <Header />
+        <Layout />
+        <Footer />
+      </div>
     </div>
   )
 }
