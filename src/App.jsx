@@ -2,6 +2,8 @@ import React from 'react'
 import Header from './components/Layout/Header';
 import Footer from './components/Layout/Footer';
 import Layout from './Layout';
+import Search from './components/Search';
+import Privacy from './components/Layout/Privacy';
 
 // import Search from './components/Search';
 

@@ -57,7 +57,8 @@ const Layout = () => {
             if (shortsMatch) return { type: 'video', id: shortsMatch[1] }
             const embedMatch = path.match(/\/embed\/([_A-Za-z0-9-]+)/)
             if (embedMatch) return { type: 'video', id: embedMatch[1] }
-        } catch (e) {
+        } catch (error) {
+            console.log('Cannot detect the Input type', error)
         }
 
         if (/^[A-Za-z0-9_-]{11}$/.test(trimmed)) return { type: 'video', id: trimmed }
@@ -130,9 +131,10 @@ const Layout = () => {
                             return prev
                         }
 
-                        const insertAt = Math.min(prev.length, currentIndex + 1)
-                        const next = [...prev.slice(0, insertAt), item, ...prev.slice(insertAt)]
-                        setCurrentIndex(insertAt)
+                        // const insertAt = Math.min(prev.length, currentIndex + 1)
+                        // const next = [...prev.slice(0, insertAt), item, ...prev.slice(insertAt)]
+                        // setCurrentIndex(insertAt)
+                        const next = [...prev, item]
                         return next
                     })
                     return
@@ -161,7 +163,8 @@ const Layout = () => {
 
     function handleEnded() {
         setCurrentIndex(prev => {
-            const next = prev < playlist.length - 1 ? prev + 1 : prev
+            // const next = prev < playlist.length - 1 ? prev + 1 : prev
+            const next = prev < playlist.length - 1 ? prev + 1 : 0
             try { console.debug('Playlist ended, advancing to', next) } catch (e) { }
             return next
         })
