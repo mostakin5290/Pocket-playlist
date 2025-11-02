@@ -31,7 +31,7 @@ const Footer = () => {
               <nav className="flex gap-6 md:gap-8 justify-center">
                 
                 <Link to='/about' className="text-sm text-muted-foreground hover:text-foreground transition">About</Link>
-                <a href="#" className="text-sm text-muted-foreground hover:text-foreground transition">Privacy</a>
+                <a href="/privacy" className="text-sm text-muted-foreground hover:text-foreground transition">Privacy</a>
                 <a href="#" className="text-sm text-muted-foreground hover:text-foreground transition">Help</a>
               </nav>
 
