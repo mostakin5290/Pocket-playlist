@@ -1,5 +1,6 @@
 import React from 'react'
 import { BorderBeam } from '@/components/ui/border-beam'
+import {Link} from 'react-router-dom';
 
 const Footer = () => {
 
@@ -28,7 +29,8 @@ const Footer = () => {
               </div>
 
               <nav className="flex gap-6 md:gap-8 justify-center">
-                <a href="#" className="text-sm text-muted-foreground hover:text-foreground transition">About</a>
+                
+                <Link to='/about' className="text-sm text-muted-foreground hover:text-foreground transition">About</Link>
                 <a href="#" className="text-sm text-muted-foreground hover:text-foreground transition">Privacy</a>
                 <a href="#" className="text-sm text-muted-foreground hover:text-foreground transition">Help</a>
               </nav>

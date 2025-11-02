@@ -5,16 +5,22 @@ import Layout from './Layout';
 import Search from './components/Search';
 import Privacy from './components/Layout/Privacy';
 
+// import Search from './components/Search';
+
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom"
+import About from './components/About/About';
+import Home from './components/Home/Home';
+
 const App = () => {
   return (
-    <div className="min-h-screen flex flex-col items-center">
-      {/* center the app content into a max-width container */}
-      <div className="w-full max-w-7xl">
-        <Header />
-        <Layout />
-        <Footer />
-      </div>
-    </div>
+    <>
+      <Router>
+        <Routes>
+          <Route path="/" element={<Home/>} />
+          <Route path="/about" element={<About/>} />
+        </Routes>
+      </Router>
+    </>
   )
 }
 export default App;
