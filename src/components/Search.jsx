@@ -166,6 +166,14 @@ const Search = ({ onSelect }) => {
                                 >
                                     Play
                                 </button>
+
+                                <button
+                                    onClick={() => handleSelect(item)}
+                                    className='inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold text-white smooth-transition'
+                                    style={{ background: 'var(--accent-gradient)', boxShadow: selectedIndex === idx ? '0 12px 28px rgba(216,27,96,0.16)' : '0 6px 18px rgba(216,27,96,0.08)' }}
+                                >
+                                    Add
+                                </button>
                                 <div className='text-xs text-muted-foreground'>#{idx + 1}</div>
                             </div>
                         </div>
