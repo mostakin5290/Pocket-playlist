@@ -41,6 +41,7 @@ export default function AudioPlayer({
   const [volume, setVolume] = useState(100);
   const [muted, setMuted] = useState(false);
   const [buffering, setBuffering] = useState(false);
+  const [videoTitleText, setVideoTitleText] = useState('YouTube');
 
   useEffect(() => {
     let mounted = true;
@@ -66,6 +67,12 @@ export default function AudioPlayer({
             setTimeout(() => {
               setDuration(e.target.getDuration());
               setVolume(e.target.getVolume());
+              try {
+                const info = e.target.getVideoData && e.target.getVideoData();
+                if (info && info.title) setVideoTitleText(info.title);
+              } catch (err) {
+                // ignore
+              }
             }, 500);
           },
           onStateChange: (ev) => {
@@ -77,7 +84,7 @@ export default function AudioPlayer({
               setPlaying(false);
             } else if (ev.data === STATES.ENDED) {
               setPlaying(false);
-              if (typeof onEnd === "function") onEnd();
+              if (typeof onEnd === 'function') onEnd();
             } else if (ev.data === STATES.BUFFERING) {
               setBuffering(true);
             }
@@ -116,25 +123,34 @@ export default function AudioPlayer({
     }
   }, []);
 
-  const seekTo = useCallback((time) => {
-    const p = playerRef.current;
-    if (!p || !ready) return;
-    p.seekTo(Number(time), true);
-    setCurrentTime(Number(time));
-  }, [ready]);
+  const seekTo = useCallback(
+    (time) => {
+      const p = playerRef.current;
+      if (!p || !ready) return;
+      p.seekTo(Number(time), true);
+      setCurrentTime(Number(time));
+    },
+    [ready]
+  );
 
-  const skip = useCallback((offset) => {
-    const next = Math.max(0, Math.min(currentTime + offset, duration));
-    seekTo(next);
-  }, [currentTime, duration, seekTo]);
+  const skip = useCallback(
+    (offset) => {
+      const next = Math.max(0, Math.min(currentTime + offset, duration));
+      seekTo(next);
+    },
+    [currentTime, duration, seekTo]
+  );
 
-  const handleVolume = useCallback((v) => {
-    const p = playerRef.current;
-    if (!p || !ready) return;
-    p.setVolume(Number(v));
-    setVolume(Number(v));
-    setMuted(Number(v) === 0);
-  }, [ready]);
+  const handleVolume = useCallback(
+    (v) => {
+      const p = playerRef.current;
+      if (!p || !ready) return;
+      p.setVolume(Number(v));
+      setVolume(Number(v));
+      setMuted(Number(v) === 0);
+    },
+    [ready]
+  );
 
   const toggleMute = useCallback(() => {
     const p = playerRef.current;
@@ -162,50 +178,43 @@ export default function AudioPlayer({
     <Box
       sx={{
         bgcolor: 'var(--card)',
-        borderRadius: '18px',
-        boxShadow: '0 12px 40px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.02)',
+        borderRadius: '20px',
+        boxShadow: '0 10px 30px rgba(0,0,0,0.55), inset 0 1px 0 rgba(255,255,255,0.02)',
         width: '100%',
-        maxWidth: 680,
+        maxWidth: { xs: 420, md: 920 },
         mx: 'auto',
-        mt: 6,
+        mt: { xs: 0, md: 4 },
         display: 'flex',
-        flexDirection: 'row',
+        flexDirection: 'column',
         alignItems: 'center',
         gap: 3,
-        minHeight: 200,
+        minHeight: { xs: 'auto', md: 260 },
         position: 'relative',
+        px: { xs: 3, md: 4 },
+        pt: { xs: 6, md: 3 },
+        pb: { xs: 6, md: 3 },
         transition: 'transform 180ms ease, box-shadow 200ms ease',
-        '&:hover': {
-          transform: 'translateY(-4px)',
-          boxShadow: '0 20px 60px rgba(0,0,0,0.7), inset 0 1px 0 rgba(255,255,255,0.02)'
-        }
       }}
     >
       <Box
         sx={{
-          width: 140,
-          height: 140,
-          m: 2,
-          borderRadius: '999px',
+          width: { xs: '76vw', md: '50vw' },
+          height: { xs: '76vw', md: 260 },
+          maxWidth: { xs: 420, md: 900 },
+          maxHeight: { xs: 420, md: 340 },
+          m: '0 auto',
+          borderRadius: '24px',
           padding: '6px',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          background: 'linear-gradient(135deg, rgba(216,27,96,0.08), rgba(142,36,170,0.06))',
+          background: 'linear-gradient(135deg, rgba(216,27,96,0.06), rgba(142,36,170,0.04))',
           position: 'relative',
-          boxShadow: `0 12px 40px rgba(142,36,170,0.12), inset 0 2px 10px rgba(0,0,0,0.6)`
+          boxShadow: `0 10px 28px rgba(142,36,170,0.10), inset 0 2px 8px rgba(0,0,0,0.5)`,
         }}
       >
-        <div style={{ width: '100%', height: '100%', borderRadius: '999px', overflow: 'hidden', background: '#0f0f12' }}>
-          <img
-            src={thumb}
-            alt={title}
-            style={{
-              width: '100%',
-              height: '100%',
-              objectFit: 'cover',
-            }}
-          />
+        <div style={{ width: '100%', height: '100%', borderRadius: '12px', overflow: 'hidden', background: '#0f0f12' }}>
+          <img src={thumb} alt={title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
         </div>
 
         {!ready && (
@@ -215,37 +224,41 @@ export default function AudioPlayer({
               inset: 0,
               width: '100%',
               height: '100%',
-              bgcolor: 'rgba(10,10,12,0.7)',
+              bgcolor: 'rgba(10,10,12,0.68)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               zIndex: 3,
-              borderRadius: '999px'
+              borderRadius: { xs: '24px', md: '12px' },
             }}
           >
             <Box
               sx={{
-                width: 42,
-                height: 42,
+                width: 36,
+                height: 36,
                 borderRadius: '50%',
-                border: `4px solid var(--accent-from)`,
+                border: `3px solid var(--accent-from)`,
                 borderTopColor: 'transparent',
                 animation: 'spin 0.95s linear infinite',
                 '@keyframes spin': {
-                  '100%': { transform: 'rotate(360deg)' }
-                }
+                  '100%': { transform: 'rotate(360deg)' },
+                },
               }}
             />
           </Box>
         )}
       </Box>
-      <Box flex={1} sx={{ pr: 2 }}>
-        <Typography variant="h6" color="#fff" sx={{ fontWeight: 700 }}>
-          {title}
-        </Typography>
-        <Typography variant="body2" color="var(--accent-from)" sx={{ mb: 1 }}>
-          {buffering ? "Buffering..." : "YouTube"}
-        </Typography>
+
+      <Box flex={1} sx={{ pr: 0, width: '100%' }}>
+        <Box sx={{ textAlign: 'center', mt: 2, width: '100%' }}>
+          <Typography variant="h6" color="#fff" sx={{ fontWeight: 700 }}>
+            {title}
+          </Typography>
+          <Typography variant="body2" color="var(--accent-from)" sx={{ mb: 1 }}>
+            {buffering ? 'Buffering...' : videoTitleText}
+          </Typography>
+        </Box>
+
         <Slider
           min={0}
           max={duration || 1}
@@ -254,15 +267,40 @@ export default function AudioPlayer({
           disabled={!ready}
           sx={{
             color: 'var(--accent-from)',
-            mt: 1,
-            height: 3,
+            mt: { xs: 2, md: 0 },
+            height: { xs: 6, md: 4 },
+            '& .MuiSlider-thumb': { width: { xs: 16, md: 10 }, height: { xs: 16, md: 10 } },
+            '& .MuiSlider-rail': { opacity: 0.25 },
           }}
         />
+
         <Box display="flex" justifyContent="space-between" sx={{ mb: 1 }}>
-          <Typography variant="caption" color="#FFD3EF">{displayTime(currentTime)}</Typography>
-          <Typography variant="caption" color="#FFD3EF">{displayTime(duration)}</Typography>
+          <Typography variant="caption" color="#FFD3EF">
+            {displayTime(currentTime)}
+          </Typography>
+          <Typography variant="caption" color="#FFD3EF">
+            {displayTime(duration)}
+          </Typography>
         </Box>
-        <Box display="flex" alignItems="center" gap={1}>
+
+        <Box
+          display="flex"
+          alignItems="center"
+          gap={1}
+          sx={{
+            justifyContent: 'center',
+            width: '100%',
+            position: 'relative',
+            mt: { xs: 2, md: -6 },
+            zIndex: 2,
+            px: { xs: 0, md: 2 },
+            py: { xs: 0, md: 1 },
+            bgcolor: { md: 'rgba(255,255,255,0.02)' },
+            borderRadius: { md: '999px' },
+            boxShadow: { md: '0 8px 24px rgba(0,0,0,0.45)' },
+            alignSelf: 'center',
+          }}
+        >
           <Tooltip title="Back 10s">
             <span>
               <IconButton onClick={() => skip(-10)} size="small" disabled={!ready}>
@@ -270,27 +308,29 @@ export default function AudioPlayer({
               </IconButton>
             </span>
           </Tooltip>
-          <Tooltip title={playing ? "Pause" : "Play"}>
+
+          <Tooltip title={playing ? 'Pause' : 'Play'}>
             <span>
               <IconButton
                 onClick={togglePlay}
                 sx={{
                   bgcolor: 'var(--accent-from)',
                   color: '#fff',
-                  width: 56,
-                  height: 56,
+                  width: { xs: 72, md: 48 },
+                  height: { xs: 72, md: 48 },
                   borderRadius: '999px',
-                  boxShadow: '0 8px 30px rgba(142,36,170,0.24), 0 6px 12px rgba(0,0,0,0.36)',
+                  boxShadow: '0 8px 22px rgba(142,36,170,0.18), 0 4px 10px rgba(0,0,0,0.28)',
                   '&:hover': { bgcolor: 'var(--accent-to)', transform: 'scale(1.03)' },
-                  transition: 'transform 160ms ease, background 160ms ease'
+                  transition: 'transform 160ms ease, background 160ms ease',
                 }}
                 size="large"
                 disabled={!ready}
               >
-                {playing ? <Pause sx={{ fontSize: 34 }} /> : <PlayArrow sx={{ fontSize: 34 }} />}
+                {playing ? <Pause sx={{ fontSize: { xs: 32, md: 22 } }} /> : <PlayArrow sx={{ fontSize: { xs: 32, md: 22 } }} />}
               </IconButton>
             </span>
           </Tooltip>
+
           <Tooltip title="Forward 10s">
             <span>
               <IconButton onClick={() => skip(10)} size="small" disabled={!ready}>
@@ -298,6 +338,7 @@ export default function AudioPlayer({
               </IconButton>
             </span>
           </Tooltip>
+
           <Tooltip title="Mute">
             <span>
               <IconButton onClick={toggleMute} sx={{ mx: 1 }} disabled={!ready}>
@@ -305,16 +346,23 @@ export default function AudioPlayer({
               </IconButton>
             </span>
           </Tooltip>
+
           <Slider
             min={0}
             max={100}
             value={muted ? 0 : volume}
             onChange={(_, v) => handleVolume(v)}
-            sx={{ width: 100, ml: 1, color: 'var(--accent-from)' }}
+            sx={{
+              width: { xs: '48%', md: 120 },
+              ml: 1,
+              color: 'var(--accent-from)',
+              '& .MuiSlider-thumb': { width: { xs: 12, md: 10 }, height: { xs: 12, md: 10 } },
+            }}
             disabled={!ready}
           />
         </Box>
       </Box>
+
       <div ref={containerRef} style={{ display: 'none' }} />
     </Box>
   );

@@ -1,6 +1,9 @@
 import React, { useState, useRef, useEffect } from 'react'
+import { AiOutlinePlus, AiOutlinePlayCircle, AiOutlineSearch } from 'react-icons/ai'
 
-const Search = ({ onSelect }) => {
+// compact prop makes the search input smaller and the dropdown full-width (for mobile header)
+
+const Search = ({ onSelect, compact = false }) => {
     const [q, setQ] = useState('')
     const [results, setResults] = useState([])
     const [loading, setLoading] = useState(false)
@@ -13,7 +16,7 @@ const Search = ({ onSelect }) => {
         setLoading(true)
         setError(null)
         try {
-            const url = `https://www.googleapis.com/youtube/v3/search?part=snippet&type=video&maxResults=8&q=${encodeURIComponent(searchTerm)}&key=${API_KEY}`
+            const url = `https://www.googleapis.com/youtube/v3/search?part=snippet&type=video&maxResults=100&q=${encodeURIComponent(searchTerm)}&key=${API_KEY}`
             const res = await fetch(url)
             if (!res.ok) throw new Error(await res.text())
             const data = await res.json()
@@ -106,19 +109,20 @@ const Search = ({ onSelect }) => {
     }
 
     return (
-        <div ref={containerRef} className='w-full flex flex-col items-center relative'>
-            <form onSubmit={onSubmit} className='w-full flex items-center justify-center'>
-                <div className='flex items-center px-3 py-2 border border-border w-full max-w-2xl rounded-full overflow-hidden bg-[#191622] shadow-md'>
+        <div ref={containerRef} className={`w-full ${compact ? 'flex items-center' : 'flex flex-col items-center'} relative`}>
+            <form onSubmit={onSubmit} className={`w-full flex items-center ${compact ? '' : 'justify-center'}`}>
+                <div className={`flex items-center ${compact ? 'px-2 py-1' : 'px-3 py-2'} border border-border w-full ${compact ? 'max-w-full' : 'max-w-2xl'} rounded-full overflow-hidden bg-[#191622] shadow-md`}
+                >
                     <input
                         value={q}
                         onChange={(e) => setQ(e.target.value)}
                         type="text"
                         placeholder='Search YouTube videos...'
                         onKeyDown={onInputKey}
-                        className='flex-1 h-10 bg-transparent text-foreground placeholder:text-muted-foreground outline-none px-3'
+                        className={`flex-1 ${compact ? 'h-8 text-sm' : 'h-10'} bg-transparent text-foreground placeholder:text-muted-foreground outline-none px-3`}
                     />
-                    <button type='submit' className='ml-3 px-4 py-2 rounded-full font-semibold text-white shadow-sm' style={{ background: 'var(--accent-gradient)' }}>
-                        {loading ? 'Searching...' : 'Search'}
+                    <button type='submit' className={`${compact ? 'ml-2 px-3 h-8' : 'ml-3 px-4 h-10'} flex items-center justify-center rounded-full font-semibold text-white shadow-sm`} style={{ background: 'var(--accent-gradient)' }}>
+                        {loading ? (compact ? <span className="text-sm">...</span> : 'Searching...') : (compact ? <AiOutlineSearch size={16} /> : 'Search')}
                     </button>
                 </div>
             </form>
@@ -129,7 +133,7 @@ const Search = ({ onSelect }) => {
                 <div
                     role="listbox"
                     aria-label="Search results"
-                    className='absolute left-1/2 top-full transform -translate-x-1/2 mt-3 w-full max-w-3xl p-3 grid grid-cols-1 gap-3 rounded-3xl z-50 max-h-[60vh] overflow-auto fade-up'
+                    className={`absolute top-full ${compact ? 'left-0 mt-2 w-full max-w-full' : 'left-1/2 transform -translate-x-1/2 mt-3 w-full max-w-3xl'} p-2 grid grid-cols-1 gap-2 rounded-3xl z-50 max-h-[60vh] overflow-auto fade-up`}
                     style={{
                         background: 'rgba(10,10,12,0.86)',
                         border: '1px solid rgba(255,255,255,0.04)',
@@ -147,10 +151,10 @@ const Search = ({ onSelect }) => {
                             ref={(el) => (itemRefs.current[idx] = el)}
                             onMouseEnter={() => setSelectedIndex(idx)}
                             onMouseLeave={() => setSelectedIndex(-1)}
-                            className={`flex items-center gap-4 p-3 rounded-2xl smooth-transition ${selectedIndex === idx ? '' : ''}`}
+                            className={`flex items-center gap-4 p-2 rounded-2xl smooth-transition ${selectedIndex === idx ? '' : ''}`}
                             style={selectedIndex === idx ? { background: 'rgba(255,255,255,0.03)', boxShadow: `0 8px 30px rgba(216,27,96,0.12), 0 2px 8px rgba(142,36,170,0.06)`, borderLeft: `6px solid var(--accent-from)` } : { background: 'transparent' }}
                         >
-                            <div className='w-44 h-28 rounded-xl overflow-hidden shrink-0' style={{ boxShadow: 'inset 0 -20px 40px rgba(0,0,0,0.5)' }}>
+                            <div className='w-32 h-20 rounded-xl overflow-hidden shrink-0' style={{ boxShadow: 'inset 0 -20px 40px rgba(0,0,0,0.5)' }}>
                                 <img src={item.thumbnail} alt={item.title} className='w-full h-full object-cover' />
                             </div>
                             <div className='flex-1 min-w-0'>
@@ -158,23 +162,26 @@ const Search = ({ onSelect }) => {
                                 <div className='text-xs text-muted-foreground mt-1 truncate'>{item.channel}</div>
                                 <div className='text-xs text-muted-foreground mt-2'>{/* placeholder for duration or extra metadata */}</div>
                             </div>
-                            <div className='ml-4 flex flex-col items-end gap-2'>
+                            <div className='ml-4 flex items-center gap-2'>
                                 <button
                                     onClick={() => handleSelect(item)}
-                                    className='inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold text-white smooth-transition'
-                                    style={{ background: 'var(--accent-gradient)', boxShadow: selectedIndex === idx ? '0 12px 28px rgba(216,27,96,0.16)' : '0 6px 18px rgba(216,27,96,0.08)' }}
+                                    aria-label={`Play ${item.title}`}
+                                    title={`Play ${item.title}`}
+                                    className='inline-flex items-center justify-center gap-2 px-3 py-1.5 rounded-full text-sm font-semibold text-white smooth-transition'
+                                    style={{ background: 'var(--accent-gradient)', boxShadow: selectedIndex === idx ? '0 10px 24px rgba(216,27,96,0.14)' : '0 4px 12px rgba(216,27,96,0.06)' }}
                                 >
-                                    Play
+                                    <AiOutlinePlayCircle size={16} />
                                 </button>
 
                                 <button
                                     onClick={() => handleSelect(item)}
-                                    className='inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold text-white smooth-transition'
-                                    style={{ background: 'var(--accent-gradient)', boxShadow: selectedIndex === idx ? '0 12px 28px rgba(216,27,96,0.16)' : '0 6px 18px rgba(216,27,96,0.08)' }}
+                                    aria-label={`Add ${item.title}`}
+                                    title={`Add ${item.title}`}
+                                    className='inline-flex items-center justify-center gap-2 px-3 py-1.5 rounded-full text-sm font-semibold text-white smooth-transition'
+                                    style={{ background: 'var(--accent-gradient)', boxShadow: selectedIndex === idx ? '0 10px 24px rgba(216,27,96,0.14)' : '0 4px 12px rgba(216,27,96,0.06)' }}
                                 >
-                                    Add
+                                    <AiOutlinePlus size={16} />
                                 </button>
-                                <div className='text-xs text-muted-foreground'>#{idx + 1}</div>
                             </div>
                         </div>
                     ))}

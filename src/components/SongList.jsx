@@ -60,10 +60,10 @@ const SongList = ({ playlistUrl = '', setPlaylistUrl = () => { }, handelReset = 
                                 {idx === currentIndex ? (
                                     <div className='inline-flex items-center gap-2 px-2 py-1 rounded-full text-xs font-medium neon-glow' style={{ background: 'var(--accent-gradient)' }}>
                                         <span className='w-2 h-2 rounded-full' style={{ background: 'var(--accent-from)' }} />
-                                        <span className='text-white'>Playing</span>
+                                        
                                     </div>
                                 ) : (
-                                    <div className='text-xs text-muted-foreground'>#{idx + 1}</div>
+                                    <div className='text-xs text-muted-foreground'>{idx + 1}</div>
                                 )}
                             </div>
                         </button>
