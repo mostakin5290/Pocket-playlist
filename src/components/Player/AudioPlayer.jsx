@@ -161,47 +161,53 @@ export default function AudioPlayer({
   return (
     <Box
       sx={{
-        bgcolor: '#191622',
-        borderRadius: 4,
-        boxShadow: 8,
+        bgcolor: 'var(--card)',
+        borderRadius: '18px',
+        boxShadow: '0 12px 40px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.02)',
         width: '100%',
-        maxWidth: 530,
+        maxWidth: 680,
         mx: 'auto',
-        mt: 5,
+        mt: 6,
         display: 'flex',
         flexDirection: 'row',
         alignItems: 'center',
-        gap: 2,
-        minHeight: 180,
+        gap: 3,
+        minHeight: 200,
         position: 'relative',
+        transition: 'transform 180ms ease, box-shadow 200ms ease',
+        '&:hover': {
+          transform: 'translateY(-4px)',
+          boxShadow: '0 20px 60px rgba(0,0,0,0.7), inset 0 1px 0 rgba(255,255,255,0.02)'
+        }
       }}
     >
       <Box
         sx={{
-          width: 120,
-          height: 120,
+          width: 140,
+          height: 140,
           m: 2,
-          borderRadius: '50%',
-          boxShadow: `0 3px 30px #FF1EA899, 0 6px 12px #000b`,
-          overflow: 'hidden',
+          borderRadius: '999px',
+          padding: '6px',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          background: '#181818',
+          background: 'linear-gradient(135deg, rgba(216,27,96,0.08), rgba(142,36,170,0.06))',
           position: 'relative',
+          boxShadow: `0 12px 40px rgba(142,36,170,0.12), inset 0 2px 10px rgba(0,0,0,0.6)`
         }}
       >
-        <img
-          src={thumb}
-          alt={title}
-          style={{
-            width: '100%',
-            height: '100%',
-            objectFit: 'cover',
-            borderRadius: '50%',
-            boxShadow: '0 2px 16px rgba(0,0,0,0.22)',
-          }}
-        />
+        <div style={{ width: '100%', height: '100%', borderRadius: '999px', overflow: 'hidden', background: '#0f0f12' }}>
+          <img
+            src={thumb}
+            alt={title}
+            style={{
+              width: '100%',
+              height: '100%',
+              objectFit: 'cover',
+            }}
+          />
+        </div>
+
         {!ready && (
           <Box
             sx={{
@@ -209,19 +215,20 @@ export default function AudioPlayer({
               inset: 0,
               width: '100%',
               height: '100%',
-              bgcolor: 'rgba(20,20,20,0.7)',
+              bgcolor: 'rgba(10,10,12,0.7)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               zIndex: 3,
+              borderRadius: '999px'
             }}
           >
             <Box
               sx={{
-                width: 38,
-                height: 38,
+                width: 42,
+                height: 42,
                 borderRadius: '50%',
-                border: '4px solid #FF1EA8',
+                border: `4px solid var(--accent-from)`,
                 borderTopColor: 'transparent',
                 animation: 'spin 0.95s linear infinite',
                 '@keyframes spin': {
@@ -236,7 +243,7 @@ export default function AudioPlayer({
         <Typography variant="h6" color="#fff" sx={{ fontWeight: 700 }}>
           {title}
         </Typography>
-        <Typography variant="body2" color="#FF1EA8" sx={{ mb: 1 }}>
+        <Typography variant="body2" color="var(--accent-from)" sx={{ mb: 1 }}>
           {buffering ? "Buffering..." : "YouTube"}
         </Typography>
         <Slider
@@ -246,7 +253,7 @@ export default function AudioPlayer({
           onChange={(_, value) => seekTo(value)}
           disabled={!ready}
           sx={{
-            color: '#FF1EA8',
+            color: 'var(--accent-from)',
             mt: 1,
             height: 3,
           }}
@@ -259,7 +266,7 @@ export default function AudioPlayer({
           <Tooltip title="Back 10s">
             <span>
               <IconButton onClick={() => skip(-10)} size="small" disabled={!ready}>
-                <SkipPrevious sx={{ color: '#FF1EA8', fontSize: 26 }} />
+                <SkipPrevious sx={{ color: 'var(--accent-from)', fontSize: 26 }} />
               </IconButton>
             </span>
           </Tooltip>
@@ -268,31 +275,33 @@ export default function AudioPlayer({
               <IconButton
                 onClick={togglePlay}
                 sx={{
-                  bgcolor: '#FF1EA8',
+                  bgcolor: 'var(--accent-from)',
                   color: '#fff',
-                  width: 48,
-                  height: 48,
-                  boxShadow: '0 0 16px 3px #FF1EA888',
-                  '&:hover': { bgcolor: '#FF56B6' },
+                  width: 56,
+                  height: 56,
+                  borderRadius: '999px',
+                  boxShadow: '0 8px 30px rgba(142,36,170,0.24), 0 6px 12px rgba(0,0,0,0.36)',
+                  '&:hover': { bgcolor: 'var(--accent-to)', transform: 'scale(1.03)' },
+                  transition: 'transform 160ms ease, background 160ms ease'
                 }}
                 size="large"
                 disabled={!ready}
               >
-                {playing ? <Pause sx={{ fontSize: 32 }} /> : <PlayArrow sx={{ fontSize: 32 }} />}
+                {playing ? <Pause sx={{ fontSize: 34 }} /> : <PlayArrow sx={{ fontSize: 34 }} />}
               </IconButton>
             </span>
           </Tooltip>
           <Tooltip title="Forward 10s">
             <span>
               <IconButton onClick={() => skip(10)} size="small" disabled={!ready}>
-                <SkipNext sx={{ color: '#FF1EA8', fontSize: 26 }} />
+                <SkipNext sx={{ color: 'var(--accent-from)', fontSize: 26 }} />
               </IconButton>
             </span>
           </Tooltip>
           <Tooltip title="Mute">
             <span>
               <IconButton onClick={toggleMute} sx={{ mx: 1 }} disabled={!ready}>
-                {muted ? <VolumeOff sx={{ color: '#FF1EA8' }} /> : <VolumeUp sx={{ color: '#FF1EA8' }} />}
+                {muted ? <VolumeOff sx={{ color: 'var(--accent-from)' }} /> : <VolumeUp sx={{ color: 'var(--accent-from)' }} />}
               </IconButton>
             </span>
           </Tooltip>
@@ -301,7 +310,7 @@ export default function AudioPlayer({
             max={100}
             value={muted ? 0 : volume}
             onChange={(_, v) => handleVolume(v)}
-            sx={{ width: 100, ml: 1, color: '#FF1EA8' }}
+            sx={{ width: 100, ml: 1, color: 'var(--accent-from)' }}
             disabled={!ready}
           />
         </Box>

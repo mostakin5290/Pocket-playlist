@@ -7,9 +7,9 @@ export const BorderBeam = ({
   size = 50,
   delay = 0,
   duration = 6,
-  // tuned to match the AudioPlayer accent (neon pink)
-  colorFrom = "#FF1EA8",
-  colorTo = "#FF56B6",
+  // tuned to match the AudioPlayer accent (theme-driven)
+  colorFrom = "var(--accent-from)",
+  colorTo = "var(--accent-to)",
   transition,
   style,
   reverse = false,

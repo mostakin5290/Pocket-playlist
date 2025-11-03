@@ -8,8 +8,13 @@ import { Video, Music } from 'lucide-react'
 import { BorderBeam } from '@/components/ui/border-beam'
 import Search from '@/components/Search'
 
-const Header = () => {
+const Header = ({ mode = 'video', setMode = () => { } }) => {
   const [open, setOpen] = useState(false);
+
+  const btnBase = 'rounded-full transform-gpu hover:scale-105 px-4 flex items-center gap-2 transition-all duration-200'
+
+  const activeClass = 'text-white ring-1'
+  const idleClass = 'bg-card/10 text-foreground hover:bg-card/20'
 
   return (
     // floating fixed header centered at top
@@ -19,14 +24,14 @@ const Header = () => {
 
           <div className="relative z-10 pointer-events-auto w-full bg-card/80 backdrop-blur-lg border border-border shadow-2xl px-4 sm:px-6 lg:px-8 rounded-3xl">
             <div className="flex items-center justify-between h-16">
-              
+
               {/* Brand */}
               <div className="flex items-center gap-3">
                 <a href="/" className="flex items-center gap-3">
                   <div
                     className="w-10 h-10 rounded-full flex items-center justify-center"
                     style={{
-                      background: 'linear-gradient(135deg,#FF1EA8,#FF56B6)',
+                      background: 'var(--accent-gradient)',
                       boxShadow: '0 8px 30px rgba(255,30,168,0.36)'
                     }}
                   >
@@ -49,13 +54,9 @@ const Header = () => {
                   <Button
                     variant="default"
                     size="sm"
-                    className="rounded-full shadow-md transform-gpu hover:scale-105 px-4 flex items-center gap-2"
-                    style={{
-                      background: 'linear-gradient(90deg,#FF1EA8,#FF56B6)',
-                      color: '#fff',
-                      // boxShadow: '0 0 12px 2px #FF56B6, 0 2px 8px 0 #191622',
-                      border: 'none',
-                    }}
+                    onClick={() => setMode('video')}
+                    className={`${btnBase} ${mode === 'video' ? activeClass : idleClass}`}
+                    style={mode === 'video' ? { background: 'var(--accent-gradient)', boxShadow: '0 6px 30px rgba(255,30,168,0.28)' } : undefined}
                   >
                     <Video size={16} />
                     Video
@@ -64,13 +65,9 @@ const Header = () => {
                   <Button
                     variant="default"
                     size="sm"
-                    className="rounded-full shadow-md transform-gpu hover:scale-105 px-4 flex items-center gap-2"
-                    style={{
-                      background: 'linear-gradient(90deg,#FF1EA8,#FF56B6)',
-                      color: '#fff',
-                      // boxShadow: '0 0 12px 2px #FF56B6, 0 2px 8px 0 #191622',
-                      border: 'none',
-                    }}
+                    onClick={() => setMode('audio')}
+                    className={`${btnBase} ${mode === 'audio' ? activeClass : idleClass}`}
+                    style={mode === 'audio' ? { background: 'var(--accent-gradient)', boxShadow: '0 6px 30px rgba(255,30,168,0.28)' } : undefined}
                   >
                     <Music size={16} />
                     Audio
@@ -104,12 +101,22 @@ const Header = () => {
 
                 <div>
                   <ButtonGroup>
-                    <Button variant="default" size="sm" className="rounded-full shadow-md px-4 flex items-center gap-2 bg-accent/10 text-accent">
+                    <Button
+                      variant="default"
+                      size="sm"
+                      onClick={() => setMode('video')}
+                      className={`rounded-full px-4 flex items-center gap-2 ${mode === 'video' ? activeClass : 'bg-accent/10 text-accent'}`}
+                    >
                       <Video size={14} />
                       Video
                     </Button>
                     <ButtonGroupSeparator />
-                    <Button variant="default" size="sm" className="rounded-full shadow-md px-4 flex items-center gap-2 bg-accent/10 text-accent">
+                    <Button
+                      variant="default"
+                      size="sm"
+                      onClick={() => setMode('audio')}
+                      className={`rounded-full px-4 flex items-center gap-2 ${mode === 'audio' ? activeClass : 'bg-accent/10 text-accent'}`}
+                    >
                       <Music size={14} />
                       Audio
                     </Button>
