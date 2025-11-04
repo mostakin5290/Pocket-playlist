@@ -29,7 +29,7 @@ const Header = ({ mode = 'video', setMode = () => { } }) => {
               <div className="flex items-center gap-3">
                 <a href="/" className="flex items-center gap-3">
                   <div
-                    className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0"
+                    className="w-10 h-10 rounded-full flex items-center justify-center shrink-0"
                     style={{
                       background: 'var(--accent-gradient)',
                       boxShadow: '0 8px 30px rgba(255,30,168,0.36)',
