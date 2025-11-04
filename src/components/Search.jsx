@@ -136,7 +136,7 @@ const Search = ({ compact = false }) => {
                         onKeyDown={onInputKey}
                         className={`flex-1 ${compact ? 'h-8 text-sm' : 'h-10'} bg-transparent text-foreground placeholder:text-muted-foreground outline-none px-3`}
                     />
-                    <Button type='submit' size={compact ? 'icon-sm' : 'icon'} className={`flex-shrink-0 text-white shadow-sm rounded-full`} style={{ background: 'var(--accent-gradient)' }}>
+                    <Button type='submit' size={compact ? 'icon-sm' : 'icon'} className={`shrink-0 text-white shadow-sm rounded-full`} style={{ background: 'var(--accent-gradient)' }}>
                         <SearchIcon size={compact ? 16 : 20} />
                     </Button>
                 </div>
