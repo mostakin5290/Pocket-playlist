@@ -1,6 +1,5 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
-import { Box, IconButton, Slider, Typography, Tooltip } from '@mui/material';
-import { PlayArrow, Pause, SkipPrevious, SkipNext, VolumeUp, VolumeOff } from '@mui/icons-material';
+import { Play, Pause, RotateCcw, Volume2, VolumeX, FastForward, Rewind } from 'lucide-react';
 
 const YT_API = 'https://www.youtube.com/iframe_api';
 
@@ -24,12 +23,15 @@ function loadYTApi() {
   });
 }
 
-export default function AudioPlayer({
+// Custom AudioPlayer component using standard HTML/Tailwind for a consistent UI
+const AudioPlayer = ({
   videoId = 'EmsRACUM4V4',
-  title = 'YouTube Audio',
-  thumbnail,
+  videoTitle = 'YouTube Audio',
+  videoThumbnail,
   onEnd,
-}) {
+  onSkipNext,
+  onSkipPrev,
+}) => {
   const containerRef = useRef(null);
   const playerRef = useRef(null);
   const tickRef = useRef(null);
@@ -38,11 +40,16 @@ export default function AudioPlayer({
   const [playing, setPlaying] = useState(false);
   const [duration, setDuration] = useState(0);
   const [currentTime, setCurrentTime] = useState(0);
-  const [volume, setVolume] = useState(100);
+  const [volume, setVolume] = useState(70);
   const [muted, setMuted] = useState(false);
   const [buffering, setBuffering] = useState(false);
-  const [videoTitleText, setVideoTitleText] = useState('YouTube');
+  const [titleText, setTitleText] = useState(videoTitle);
 
+  useEffect(() => {
+    setTitleText(videoTitle);
+  }, [videoTitle]);
+
+  // Player setup and teardown
   useEffect(() => {
     let mounted = true;
     loadYTApi().then((YT) => {
@@ -50,29 +57,40 @@ export default function AudioPlayer({
       const id = `yt-audio-${Date.now()}`;
       const div = document.createElement('div');
       div.id = id;
-      div.style.width = 0;
-      div.style.height = 0;
+      div.style.width = '1px';
+      div.style.height = '1px';
+      div.style.position = 'absolute';
+      div.style.left = '-9999px';
+
       if (containerRef.current) {
         containerRef.current.innerHTML = '';
         containerRef.current.appendChild(div);
       }
-      playerRef.current = new YT.Player(id, {
+
+      const player = new YT.Player(id, {
         height: 0,
         width: 0,
         videoId,
-        playerVars: { playsinline: 1, rel: 0, modestbranding: 1, controls: 0 },
+        playerVars: {
+          playsinline: 1, rel: 0, modestbranding: 1, controls: 0, disablekb: 1,
+          iv_load_policy: 3,
+          html5: 1
+        },
         events: {
           onReady: (e) => {
             setReady(true);
+            const p = e.target;
+            p.setVolume(volume);
+            p.mute(); 
+            p.playVideo();
             setTimeout(() => {
-              setDuration(e.target.getDuration());
-              setVolume(e.target.getVolume());
+              p.unMute();
+              setDuration(p.getDuration());
+              setVolume(p.getVolume());
               try {
-                const info = e.target.getVideoData && e.target.getVideoData();
-                if (info && info.title) setVideoTitleText(info.title);
-              } catch (err) {
-                // ignore
-              }
+                const info = p.getVideoData && p.getVideoData();
+                if (info && info.title) setTitleText(info.title);
+              } catch (err) { /* ignore */ }
             }, 500);
           },
           onStateChange: (ev) => {
@@ -87,41 +105,70 @@ export default function AudioPlayer({
               if (typeof onEnd === 'function') onEnd();
             } else if (ev.data === STATES.BUFFERING) {
               setBuffering(true);
+            } else if (ev.data === STATES.CUED) {
+              if (playing) p.playVideo();
             }
           },
+          onError: (e) => {
+            console.error('YouTube Player Error', e);
+            if (e.data === 150 || e.data === 101) {
+                 if (typeof onSkipNext === 'function') onSkipNext();
+                 else if (typeof onEnd === 'function') onEnd();
+            }
+          }
         },
       });
+      playerRef.current = player;
     });
     return () => {
       mounted = false;
       if (tickRef.current) clearInterval(tickRef.current);
       if (playerRef.current && playerRef.current.destroy) playerRef.current.destroy();
     };
-  }, [videoId, onEnd]);
+  }, [videoId, onEnd, onSkipNext]);
+
+  // Logic to load new videoId when prop changes
+  useEffect(() => {
+    const p = playerRef.current;
+    if (p && ready) {
+      try {
+        p.loadVideoById(videoId);
+        p.playVideo();
+      } catch (e) { console.warn('AudioPlayer video update error', e); }
+    }
+  }, [videoId, ready]);
 
   // Timer for progress
   useEffect(() => {
     if (!playing || !ready || !playerRef.current) return;
     tickRef.current = setInterval(() => {
-      setCurrentTime(playerRef.current.getCurrentTime());
-      setDuration(playerRef.current.getDuration());
+      try {
+        setCurrentTime(playerRef.current.getCurrentTime());
+        setDuration(playerRef.current.getDuration());
+        if (playerRef.current.isMuted() !== muted) setMuted(playerRef.current.isMuted());
+      } catch (e) {
+        if (tickRef.current) clearInterval(tickRef.current);
+      }
     }, 500);
     return () => {
       if (tickRef.current) clearInterval(tickRef.current);
     };
-  }, [playing, ready]);
+  }, [playing, ready, muted]);
 
   // Controls
   const togglePlay = useCallback(() => {
     const p = playerRef.current;
-    if (!p) return;
+    if (!p || !ready) return;
     const state = p.getPlayerState();
     if (state === window.YT.PlayerState.PLAYING) {
       p.pauseVideo();
     } else {
+      if (state === window.YT.PlayerState.ENDED) {
+         p.seekTo(0, true);
+      }
       p.playVideo();
     }
-  }, []);
+  }, [ready]);
 
   const seekTo = useCallback(
     (time) => {
@@ -133,6 +180,13 @@ export default function AudioPlayer({
     [ready]
   );
 
+  const handleSeek = useCallback((e) => {
+    seekTo(e.target.value);
+  }, [seekTo]);
+
+  const skipForward = useCallback(() => skip(10), [seekTo, currentTime, duration]);
+  const skipBackward = useCallback(() => skip(-10), [seekTo, currentTime, duration]);
+
   const skip = useCallback(
     (offset) => {
       const next = Math.max(0, Math.min(currentTime + offset, duration));
@@ -141,15 +195,17 @@ export default function AudioPlayer({
     [currentTime, duration, seekTo]
   );
 
-  const handleVolume = useCallback(
-    (v) => {
+  const handleVolumeChange = useCallback(
+    (e) => {
+      const v = Number(e.target.value);
       const p = playerRef.current;
       if (!p || !ready) return;
-      p.setVolume(Number(v));
-      setVolume(Number(v));
-      setMuted(Number(v) === 0);
+      p.setVolume(v);
+      setVolume(v);
+      if (v > 0 && muted) p.unMute();
+      if (v === 0 && !muted) p.mute();
     },
-    [ready]
+    [ready, muted]
   );
 
   const toggleMute = useCallback(() => {
@@ -158,212 +214,127 @@ export default function AudioPlayer({
     if (muted) {
       p.unMute();
       setMuted(false);
-      setVolume(p.getVolume());
+      if (volume === 0) p.setVolume(70); setVolume(p.getVolume());
     } else {
       p.mute();
       setMuted(true);
     }
-  }, [muted, ready]);
+  }, [muted, ready, volume]);
 
   const displayTime = (s = 0) => {
+    if (!s || s < 0) return '0:00';
     const sec = Math.floor(s);
     const m = Math.floor(sec / 60);
     const r = sec % 60;
     return `${m}:${r.toString().padStart(2, '0')}`;
   };
 
-  const thumb = thumbnail || `https://i.ytimg.com/vi/${videoId}/mqdefault.jpg`;
-
+  const thumb = videoThumbnail || `https://i.ytimg.com/vi/${videoId}/mqdefault.jpg`;
+  const activeColor = 'var(--accent-from)';
+  
   return (
-    <Box
-      sx={{
-        bgcolor: 'var(--card)',
-        borderRadius: '20px',
+    <div
+      className="bg-card rounded-2xl shadow-2xl w-full max-w-lg mx-auto flex flex-col items-center gap-6 p-6 md:p-8 relative smooth-transition fade-up"
+      style={{
         boxShadow: '0 10px 30px rgba(0,0,0,0.55), inset 0 1px 0 rgba(255,255,255,0.02)',
-        width: '100%',
-        maxWidth: { xs: 420, md: 920 },
-        mx: 'auto',
-        mt: { xs: 0, md: 4 },
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        gap: 3,
-        minHeight: { xs: 'auto', md: 260 },
-        position: 'relative',
-        px: { xs: 3, md: 4 },
-        pt: { xs: 6, md: 3 },
-        pb: { xs: 6, md: 3 },
-        transition: 'transform 180ms ease, box-shadow 200ms ease',
       }}
     >
-      <Box
-        sx={{
-          width: { xs: '76vw', md: '50vw' },
-          height: { xs: '76vw', md: 260 },
-          maxWidth: { xs: 420, md: 900 },
-          maxHeight: { xs: 420, md: 340 },
-          m: '0 auto',
-          borderRadius: '24px',
-          padding: '6px',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          background: 'linear-gradient(135deg, rgba(216,27,96,0.06), rgba(142,36,170,0.04))',
-          position: 'relative',
-          boxShadow: `0 10px 28px rgba(142,36,170,0.10), inset 0 2px 8px rgba(0,0,0,0.5)`,
-        }}
-      >
-        <div style={{ width: '100%', height: '100%', borderRadius: '12px', overflow: 'hidden', background: '#0f0f12' }}>
-          <img src={thumb} alt={title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+      <div className="relative w-full aspect-square max-w-xs p-1.5 rounded-3xl bg-gradient-to-br from-purple-900/10 to-pink-900/10 shadow-lg md:max-w-sm">
+        <div className='w-full h-full rounded-2xl overflow-hidden bg-[#0f0f12]'>
+          <img src={thumb} alt={titleText} className='w-full h-full object-cover' />
         </div>
 
         {!ready && (
-          <Box
-            sx={{
-              position: 'absolute',
-              inset: 0,
-              width: '100%',
-              height: '100%',
-              bgcolor: 'rgba(10,10,12,0.68)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              zIndex: 3,
-              borderRadius: { xs: '24px', md: '12px' },
-            }}
-          >
-            <Box
-              sx={{
-                width: 36,
-                height: 36,
-                borderRadius: '50%',
-                border: `3px solid var(--accent-from)`,
-                borderTopColor: 'transparent',
-                animation: 'spin 0.95s linear infinite',
-                '@keyframes spin': {
-                  '100%': { transform: 'rotate(360deg)' },
-                },
-              }}
-            />
-          </Box>
+          <div className="absolute inset-0 rounded-2xl flex items-center justify-center bg-black/60 z-30">
+            <div className="w-10 h-10 rounded-full border-4 border-t-transparent animate-spin" style={{ borderColor: activeColor, borderTopColor: 'transparent' }} />
+          </div>
         )}
-      </Box>
+      </div>
 
-      <Box flex={1} sx={{ pr: 0, width: '100%' }}>
-        <Box sx={{ textAlign: 'center', mt: 2, width: '100%' }}>
-          <Typography variant="h6" color="#fff" sx={{ fontWeight: 700 }}>
-            {title}
-          </Typography>
-          <Typography variant="body2" color="var(--accent-from)" sx={{ mb: 1 }}>
-            {buffering ? 'Buffering...' : videoTitleText}
-          </Typography>
-        </Box>
+      <div className="w-full text-center">
+        <h2 className="text-xl font-bold text-white truncate">{titleText}</h2>
+        <p className="text-sm" style={{ color: activeColor }}>
+          {buffering ? 'Buffering...' : 'Now Playing'}
+        </p>
+      </div>
 
-        <Slider
+      {/* Progress Slider */}
+      <div className="w-full">
+        <input
+          type="range"
           min={0}
           max={duration || 1}
+          step="any"
           value={currentTime}
-          onChange={(_, value) => seekTo(value)}
+          onInput={handleSeek} // Use onInput for continuous update
           disabled={!ready}
-          sx={{
-            color: 'var(--accent-from)',
-            mt: { xs: 2, md: 0 },
-            height: { xs: 6, md: 4 },
-            '& .MuiSlider-thumb': { width: { xs: 16, md: 10 }, height: { xs: 16, md: 10 } },
-            '& .MuiSlider-rail': { opacity: 0.25 },
+          className="w-full h-1 appearance-none bg-gray-700 rounded-full cursor-pointer"
+          style={{
+            '--accent-color': activeColor,
+            '--rail-color': 'rgba(255,255,255,0.25)',
+            '--progress': `${(currentTime / (duration || 1)) * 100}%`,
+            background: `linear-gradient(to right, var(--accent-color) 0%, var(--accent-color) var(--progress), var(--rail-color) var(--progress), var(--rail-color) 100%)`,
           }}
         />
+        <div className="flex justify-between text-xs text-muted-foreground mt-1">
+          <span>{displayTime(currentTime)}</span>
+          <span>{displayTime(duration)}</span>
+        </div>
+      </div>
 
-        <Box display="flex" justifyContent="space-between" sx={{ mb: 1 }}>
-          <Typography variant="caption" color="#FFD3EF">
-            {displayTime(currentTime)}
-          </Typography>
-          <Typography variant="caption" color="#FFD3EF">
-            {displayTime(duration)}
-          </Typography>
-        </Box>
+      {/* Controls */}
+      <div className="flex items-center gap-6">
+        <button title="Previous Song" onClick={onSkipPrev} disabled={!ready} className="text-muted-foreground hover:text-white transition-colors p-2">
+            <Rewind size={24} />
+        </button>
 
-        <Box
-          display="flex"
-          alignItems="center"
-          gap={1}
-          sx={{
-            justifyContent: 'center',
-            width: '100%',
-            position: 'relative',
-            mt: { xs: 2, md: -6 },
-            zIndex: 2,
-            px: { xs: 0, md: 2 },
-            py: { xs: 0, md: 1 },
-            bgcolor: { md: 'rgba(255,255,255,0.02)' },
-            borderRadius: { md: '999px' },
-            boxShadow: { md: '0 8px 24px rgba(0,0,0,0.45)' },
-            alignSelf: 'center',
-          }}
+        <button title="Rewind 10s" onClick={skipBackward} disabled={!ready} className="text-muted-foreground hover:text-white transition-colors p-2">
+            <RotateCcw size={20} />
+        </button>
+
+        <button
+          title={playing ? 'Pause' : 'Play'}
+          onClick={togglePlay}
+          className="w-14 h-14 rounded-full flex items-center justify-center text-white shadow-xl hover:scale-105 transition-transform"
+          style={{ background: 'var(--accent-gradient)', boxShadow: '0 12px 30px rgba(124, 58, 237, 0.4), 0 4px 10px rgba(0,0,0,0.38)' }}
+          disabled={!ready}
         >
-          <Tooltip title="Back 10s">
-            <span>
-              <IconButton onClick={() => skip(-10)} size="small" disabled={!ready}>
-                <SkipPrevious sx={{ color: 'var(--accent-from)', fontSize: 26 }} />
-              </IconButton>
-            </span>
-          </Tooltip>
+          {playing ? <Pause size={24} fill="currentColor" /> : <Play size={24} fill="currentColor" className='translate-x-[1px]' />}
+        </button>
 
-          <Tooltip title={playing ? 'Pause' : 'Play'}>
-            <span>
-              <IconButton
-                onClick={togglePlay}
-                sx={{
-                  bgcolor: 'var(--accent-from)',
-                  color: '#fff',
-                  width: { xs: 72, md: 48 },
-                  height: { xs: 72, md: 48 },
-                  borderRadius: '999px',
-                  boxShadow: '0 8px 22px rgba(142,36,170,0.18), 0 4px 10px rgba(0,0,0,0.28)',
-                  '&:hover': { bgcolor: 'var(--accent-to)', transform: 'scale(1.03)' },
-                  transition: 'transform 160ms ease, background 160ms ease',
-                }}
-                size="large"
-                disabled={!ready}
-              >
-                {playing ? <Pause sx={{ fontSize: { xs: 32, md: 22 } }} /> : <PlayArrow sx={{ fontSize: { xs: 32, md: 22 } }} />}
-              </IconButton>
-            </span>
-          </Tooltip>
+        <button title="Forward 10s" onClick={skipForward} disabled={!ready} className="text-muted-foreground hover:text-white transition-colors p-2">
+            <FastForward size={20} />
+        </button>
+        <button title="Next Song" onClick={onSkipNext} disabled={!ready} className="text-muted-foreground hover:text-white transition-colors p-2">
+            <FastForward size={24} />
+        </button>
+      </div>
 
-          <Tooltip title="Forward 10s">
-            <span>
-              <IconButton onClick={() => skip(10)} size="small" disabled={!ready}>
-                <SkipNext sx={{ color: 'var(--accent-from)', fontSize: 26 }} />
-              </IconButton>
-            </span>
-          </Tooltip>
-
-          <Tooltip title="Mute">
-            <span>
-              <IconButton onClick={toggleMute} sx={{ mx: 1 }} disabled={!ready}>
-                {muted ? <VolumeOff sx={{ color: 'var(--accent-from)' }} /> : <VolumeUp sx={{ color: 'var(--accent-from)' }} />}
-              </IconButton>
-            </span>
-          </Tooltip>
-
-          <Slider
-            min={0}
-            max={100}
-            value={muted ? 0 : volume}
-            onChange={(_, v) => handleVolume(v)}
-            sx={{
-              width: { xs: '48%', md: 120 },
-              ml: 1,
-              color: 'var(--accent-from)',
-              '& .MuiSlider-thumb': { width: { xs: 12, md: 10 }, height: { xs: 12, md: 10 } },
-            }}
-            disabled={!ready}
-          />
-        </Box>
-      </Box>
+      {/* Volume Control */}
+      <div className="flex items-center gap-3 w-full max-w-xs mt-2">
+        <button title={muted ? 'Unmute' : 'Mute'} onClick={toggleMute} disabled={!ready} className="text-muted-foreground hover:text-white transition-colors p-1">
+          {muted || volume === 0 ? <VolumeX size={20} /> : <Volume2 size={20} />}
+        </button>
+        <input
+          type="range"
+          min={0}
+          max={100}
+          value={muted ? 0 : volume}
+          onInput={handleVolumeChange}
+          disabled={!ready}
+          className="flex-1 h-1 appearance-none bg-gray-700 rounded-full cursor-pointer"
+          style={{
+            '--accent-color': activeColor,
+            '--rail-color': 'rgba(255,255,255,0.25)',
+            '--progress': `${(muted ? 0 : volume)}%`,
+            background: `linear-gradient(to right, var(--accent-color) 0%, var(--accent-color) var(--progress), var(--rail-color) var(--progress), var(--rail-color) 100%)`,
+          }}
+        />
+      </div>
 
       <div ref={containerRef} style={{ display: 'none' }} />
-    </Box>
+    </div>
   );
-}
+};
+
+export default AudioPlayer;
