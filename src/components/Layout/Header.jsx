@@ -15,7 +15,7 @@ const Header = ({ mode = 'video', setMode = () => { } }) => {
   const idleClass = 'bg-card/10 text-foreground hover:bg-card/20'
 
   return (
-    <header className="fixed inset-x-0 top-2 md:top-4 z-50 pointer-events-none">
+    <header className=" z-50 pointer-events-none">
       <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
         <div className="relative rounded-3xl overflow-visible">
 
