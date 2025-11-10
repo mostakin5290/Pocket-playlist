@@ -31,7 +31,7 @@ const SongList = ({
 
     return (
         <div className='relative h-auto md:h-[calc(100vh-100px)] w-full rounded-2xl p-5 bg-card shadow-2xl fade-up flex flex-col'>
-            <div className="flex-shrink-0 mb-4">
+            <div className="shrink-0 mb-4">
                 {/* Playlist Selector/Manager */}
                 <div className='mb-4'>
                     <h3 className="text-lg font-semibold mb-2 text-foreground">Playlists</h3>
@@ -60,11 +60,11 @@ const SongList = ({
                             value={newListName}
                             onChange={(e) => setNewListName(e.target.value)}
                             placeholder='New list name'
-                            className='flex-1 h-10 px-4 bg-card/90 border border-border rounded-full outline-none placeholder:text-muted-foreground text-foreground transition-shadow focus-visible:ring-ring/50 focus-visible:ring-2'
+                            className='flex-1 w-auto h-10 px-4 bg-card/90 border border-border rounded-full outline-none placeholder:text-muted-foreground text-foreground transition-shadow focus-visible:ring-ring/50 focus-visible:ring-2'
                         />
-                        <Button variant="outline" size="sm" onClick={handleCreate} disabled={!newListName.trim()} className="rounded-full flex-shrink-0">
+                        <Button variant="outline" size="sm" onClick={handleCreate} disabled={!newListName.trim()} className="rounded-full shrink-0">
                             <Plus size={16} />
-                            Create
+                            <span className="hidden sm:inline md:inline">Create</span>
                         </Button>
                     </div>
                 </div>
@@ -78,7 +78,7 @@ const SongList = ({
                             value={playlistUrl}
                             onChange={(e) => setPlaylistUrl(e.target.value)}
                             placeholder='YouTube URL or ID'
-                            className='w-full h-10 px-4 bg-card/90 border border-border rounded-full outline-none placeholder:text-muted-foreground text-foreground transition-shadow focus-visible:ring-ring/50 focus-visible:ring-2'
+                            className='w-auto h-10 px-4 bg-card/90 border border-border rounded-full outline-none placeholder:text-muted-foreground text-foreground transition-shadow focus-visible:ring-ring/50 focus-visible:ring-2'
                         />
                     </div>
                     <Button
@@ -89,7 +89,7 @@ const SongList = ({
                         className="rounded-full flex-shrink-0 h-10 px-4 flex items-center justify-center gap-2 text-white"
                         style={{ background: 'var(--accent-gradient)' }}>
                         <Plus size={16} />
-                        Add
+                        <span className="hidden sm:inline">Add</span>
                     </Button>
                 </div>
                 <Button
@@ -104,7 +104,7 @@ const SongList = ({
             </div>
 
             {/* Song List */}
-            <h3 className="text-lg font-semibold mb-2 text-foreground flex-shrink-0">Up Next ({activePlaylist.items.length} songs)</h3>
+            <h3 className="text-lg font-semibold mb-2 text-foreground shrink-0">Up Next ({activePlaylist.items.length} songs)</h3>
             {playlist.length === 0 && (
                 <p className="text-sm text-muted-foreground flex-grow">No songs in the active playlist. Add some to get started.</p>
             )}
