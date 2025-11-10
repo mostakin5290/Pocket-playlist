@@ -1,5 +1,4 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { BorderBeam } from "../ui/border-beam"
 import { createPlayer } from '../../lib/ytManager'
 
 const YTPlayer = ({ videoId = 'EmsRACUM4V4', onEnd = null, title = 'YouTube player' }) => {
@@ -25,7 +24,6 @@ const YTPlayer = ({ videoId = 'EmsRACUM4V4', onEnd = null, title = 'YouTube play
             height: '100%',
             width: '100%',
             videoId,
-            // Make sure to use '1' for playsinline and '0' for rel (no related videos)
             playerVars: { playsinline: 1, rel: 0, modestbranding: 1, controls: 1, disablekb: 1 },
             events: {
                 onReady: (ev) => {
@@ -73,19 +71,7 @@ const YTPlayer = ({ videoId = 'EmsRACUM4V4', onEnd = null, title = 'YouTube play
                     </div>
                 )}
             </div>
-            {/* Border beams for UI flair */}
-            <BorderBeam
-                duration={6}
-                size={400}
-                className="from-transparent via-red-500 to-transparent"
-            />
-            <BorderBeam
-                duration={6}
-                delay={3}
-                size={400}
-                borderWidth={2}
-                className="from-transparent via-blue-500 to-transparent"
-            />
+            {/* Simplified: no decorative beams to keep player focused and lightweight */}
         </div>
     )
 }

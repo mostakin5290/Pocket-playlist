@@ -10,15 +10,17 @@ import Privacy from './components/Layout/Privacy';
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom"
 import About from './components/About/About';
 import Home from './components/Home/Home';
+import Help from './components/Help/Help';
 
 const App = () => {
   return (
     <>
       <Router>
         <Routes>
-          <Route path="/" element={<Home/>} />
-          <Route path="/about" element={<About/>} />
-          <Route path="/privacy" element={<Privacy/>} />
+          <Route path="/" element={<Home />} />
+          <Route path="/about" element={<About />} />
+          <Route path="/help" element={<Help />} />
+          <Route path="/privacy" element={<Privacy />} />
         </Routes>
       </Router>
     </>

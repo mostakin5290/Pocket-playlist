@@ -10,8 +10,8 @@ const About = () => {
         {/* Hero */}
         <section className="bg-card border border-border rounded-2xl p-8 shadow-2xl mb-8">
           <div className="flex flex-col md:flex-row items-center gap-6">
-            <div className="w-20 h-20 rounded-full flex items-center justify-center" style={{ background: 'var(--accent-gradient)', boxShadow: '0 10px 30px rgba(142,36,170,0.14)' }}>
-              <span className="text-white font-bold">PP</span>
+            <div className="w-20 h-20 rounded-full flex items-center justify-center" style={{ boxShadow: '0 10px 30px rgba(142,36,170,0.14)' }}>
+              <img src="/logo.svg" alt="Pocket Playlist Logo" />
             </div>
             <div>
               <h1 className="text-3xl md:text-4xl font-bold">Pocket Playlist — music, simplified</h1>
@@ -54,20 +54,7 @@ const About = () => {
               <li>Use the Video/Audio toggle in the header to switch modes.</li>
               <li>Click a track to play, or let the queue play continuously.</li>
             </ol>
-          </div>
 
-          <aside className="bg-card border border-border rounded-2xl p-6 shadow-lg">
-            <h3 className='text-lg font-semibold mb-3'>Meet Our Team</h3>
-            <div className='flex flex-col gap-3'>
-              <ProfileCard Fname="Mostakin Mondal" />
-              <ProfileCard Fname="Sandipan Pal" />
-              <ProfileCard Fname="Sk Asfar Ali" />
-            </div>
-          </aside>
-        </section>
-
-        {/* FAQ + Contact */}
-        <section className="bg-card border border-border rounded-2xl p-6 shadow-lg mb-8">
           <h2 className="text-2xl font-semibold mb-4">FAQ</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
@@ -92,7 +79,22 @@ const About = () => {
             <h3 className="text-lg font-semibold mb-2">Contact</h3>
             <p className="text-sm text-muted-foreground">Questions or feedback? Email us at <a className='text-accent-foreground underline' href="mailto:hello@pocket-playlist.example">hello@pocket-playlist.example</a></p>
           </div>
+          </div>
+          
+
+          <aside className="bg-card border border-border rounded-2xl p-6 shadow-lg">
+            <h3 className='text-lg font-semibold mb-3'>Meet Our Team</h3>
+            <div className='flex flex-col gap-3'>
+              <ProfileCard Fname="Mostakin Mondal" />
+              <ProfileCard Fname="Sandipan Pal" />
+              <ProfileCard Fname="Sk Asfar Ali" />
+            </div>
+          </aside>
+          
         </section>
+
+        {/* FAQ + Contact */}
+
       </div>
 
       <Footer />

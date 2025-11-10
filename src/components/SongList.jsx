@@ -47,7 +47,9 @@ const SongList = ({
                             >
                                 {pl.name} ({pl.items.length})
                                 {pl.id !== 'default-playlist' && pl.id === activePlaylistId && (
-                                    <Trash2 size={14} className='ml-1 text-white hover:text-red-300' onClick={(e) => { e.stopPropagation(); handleDeletePlaylist(pl.id); }} />
+                                    <span className='ml-1 cursor-pointer' onClick={(e) => { e.stopPropagation(); handleDeletePlaylist(pl.id); }} aria-label={`Delete ${pl.name}`} title={`Delete ${pl.name}`}>
+                                        <Trash2 size={14} className='text-white hover:text-red-300' />
+                                    </span>
                                 )}
                             </Button>
                         ))}
@@ -67,7 +69,7 @@ const SongList = ({
                     </div>
                 </div>
                 <Separator className="my-4" />
-                
+
                 {/* URL/ID Input for adding videos/playlists */}
                 <div className='flex items-end gap-2 mb-4'>
                     <div className='flex-1'>
@@ -130,7 +132,7 @@ const SongList = ({
                                     </div>
                                 )}
                             </button>
-                            
+
                             <div className='flex-1 min-w-0'>
                                 <div className='text-sm font-medium text-foreground truncate'>{item.title}</div>
                                 <div className='text-xs text-muted-foreground mt-1 truncate'>{item.channel}</div>
@@ -139,7 +141,7 @@ const SongList = ({
                             <div className='shrink-0 flex items-center gap-2'>
                                 {isPlaying ? (
                                     <span className='inline-flex items-center px-2 py-1 rounded-full text-xs font-medium' style={{ background: 'var(--accent-gradient)' }}>
-                                        <Music size={12} className='mr-1'/> Playing
+                                        <Music size={12} className='mr-1' /> Playing
                                     </span>
                                 ) : (
                                     <div className='text-xs text-muted-foreground'>{idx + 1}</div>
@@ -149,9 +151,9 @@ const SongList = ({
                                     size="icon-sm"
                                     onClick={() => handleRemoveSong(item.id)}
                                     title="Remove from playlist"
-                                    className="text-muted-foreground hover:text-destructive hover:bg-destructive/10"
+                                    className="text-muted-foreground rounded-2xl hover:text-destructive hover:bg-destructive/10"
                                 >
-                                    <X size={16} />
+                                    <Trash2 size={16} />
                                 </Button>
                             </div>
                         </div>

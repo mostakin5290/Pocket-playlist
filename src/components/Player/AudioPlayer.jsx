@@ -171,80 +171,8 @@ const AudioPlayer = ({
     };
   }, [playing, ready, muted]);
 
-  // Media Session API & visibility handling (best-effort)
-  useEffect(() => {
-    // Keep media session metadata & action handlers in sync so lock-screen / notification controls work
-    if ('mediaSession' in navigator && playerRef.current) {
-      try {
-        const artworkSrc = videoThumbnail || `https://i.ytimg.com/vi/${videoId}/mqdefault.jpg`;
-        navigator.mediaSession.metadata = new window.MediaMetadata({
-          title: titleText || videoTitle,
-          artist: '',
-          album: '',
-          artwork: [
-            { src: artworkSrc, sizes: '96x96', type: 'image/png' },
-            { src: artworkSrc, sizes: '128x128', type: 'image/png' },
-            { src: artworkSrc, sizes: '192x192', type: 'image/png' },
-            { src: artworkSrc, sizes: '256x256', type: 'image/png' }
-          ]
-        });
-
-        navigator.mediaSession.setActionHandler('play', () => {
-          try { playerRef.current.playVideo && playerRef.current.playVideo(); } catch (e) { }
-        });
-        navigator.mediaSession.setActionHandler('pause', () => {
-          try { playerRef.current.pauseVideo && playerRef.current.pauseVideo(); } catch (e) { }
-        });
-        navigator.mediaSession.setActionHandler('seekbackward', (details) => {
-          const skip = (details && details.seekOffset) || 10;
-          try { playerRef.current.seekTo(Math.max(0, playerRef.current.getCurrentTime() - skip), true); } catch (e) { }
-        });
-        navigator.mediaSession.setActionHandler('seekforward', (details) => {
-          const skip = (details && details.seekOffset) || 10;
-          try { playerRef.current.seekTo(Math.min(playerRef.current.getDuration(), playerRef.current.getCurrentTime() + skip), true); } catch (e) { }
-        });
-        navigator.mediaSession.setActionHandler('seekto', (details) => {
-          try { if (details && typeof details.seekTime === 'number') playerRef.current.seekTo(details.seekTime, true); } catch (e) { }
-        });
-        navigator.mediaSession.setActionHandler('previoustrack', () => { if (typeof onSkipPrev === 'function') onSkipPrev(); });
-        navigator.mediaSession.setActionHandler('nexttrack', () => { if (typeof onSkipNext === 'function') onSkipNext(); });
-
-        // Periodically update position state when playing
-        const posInterval = setInterval(() => {
-          try {
-            if (navigator.mediaSession.setPositionState && playerRef.current && playing) {
-              navigator.mediaSession.setPositionState({
-                duration: playerRef.current.getDuration() || duration || 0,
-                playbackRate: 1,
-                position: playerRef.current.getCurrentTime() || currentTime || 0
-              });
-            }
-          } catch (e) { /* ignore */ }
-        }, 1000);
-
-        return () => {
-          clearInterval(posInterval);
-          try {
-            // Clear handlers
-            ['play', 'pause', 'seekbackward', 'seekforward', 'seekto', 'previoustrack', 'nexttrack'].forEach(a => {
-              try { navigator.mediaSession.setActionHandler(a, null); } catch (e) { }
-            });
-          } catch (e) { }
-        };
-      } catch (e) { /* ignore if mediaSession throws on some browsers */ }
-    }
-    return undefined;
-  }, [titleText, videoThumbnail, playing, currentTime, duration, videoTitle, onSkipNext, onSkipPrev]);
-
-  // Visibility change: ensure we don't programmatically pause when page hides; this is a best-effort hook.
-  useEffect(() => {
-    const onVisibility = () => {
-      // Do nothing — we avoid auto-pausing. Some browsers suspend JS when hidden; audio element/player may continue.
-      // This hook is left in case future handling is needed.
-    };
-    document.addEventListener('visibilitychange', onVisibility);
-    return () => document.removeEventListener('visibilitychange', onVisibility);
-  }, []);
+  // Lightweight: avoid complex MediaSession and visibility handling here to keep player logic focused
+  // (This keeps the component smaller and more predictable across browsers/devices.)
 
   // Controls
   const togglePlay = useCallback(() => {
@@ -325,12 +253,9 @@ const AudioPlayer = ({
 
   return (
     <div
-      className="bg-card rounded-2xl shadow-2xl w-full md:max-w-lg md:mx-auto flex flex-col items-center gap-6 -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8 py-6 md:py-8 relative smooth-transition fade-up"
-      style={{
-        boxShadow: '0 10px 30px rgba(0,0,0,0.55), inset 0 1px 0 rgba(255,255,255,0.02)',
-      }}
+      className="bg-card rounded-2xl shadow-lg w-full md:mx-auto flex flex-col items-center gap-6 px-4 sm:px-6 lg:px-8 py-6 md:py-8 relative smooth-transition fade-up"
     >
-      <div className="relative w-full aspect-square p-1.5 rounded-3xl bg-gradient-to-br from-purple-900/10 to-pink-900/10 shadow-lg md:max-w-sm">
+      <div className="relative w-full aspect-video p-1.5 rounded-3xl bg-gradient-to from-purple-900/10 to-pink-900/10 shadow-lg md:max-w-sm">
         <div className='w-full h-full rounded-2xl overflow-hidden bg-[#0f0f12]'>
           <img src={thumb} alt={titleText} className='w-full h-full object-cover' />
         </div>
@@ -359,7 +284,7 @@ const AudioPlayer = ({
           value={currentTime}
           onInput={handleSeek} // Use onInput for continuous update
           disabled={!ready}
-          className="w-full h-1 appearance-none bg-gray-700 rounded-full cursor-pointer"
+          className="w-full h-2 md:h-1 appearance-none bg-gray-700 rounded-full cursor-pointer"
           style={{
             '--accent-color': activeColor,
             '--rail-color': 'rgba(255,255,255,0.25)',
@@ -374,35 +299,35 @@ const AudioPlayer = ({
       </div>
 
       {/* Controls */}
-      <div className="flex items-center gap-6">
+      <div className="flex flex-wrap items-center justify-center gap-4">
         <button title="Previous Song" onClick={onSkipPrev} disabled={!ready} className="text-muted-foreground hover:text-white transition-colors p-2">
           <Rewind size={24} />
         </button>
 
         <button title="Rewind 10s" onClick={skipBackward} disabled={!ready} className="text-muted-foreground hover:text-white transition-colors p-2">
-          <RotateCcw size={20} />
+          <Rewind size={18} />
         </button>
 
         <button
           title={playing ? 'Pause' : 'Play'}
           onClick={togglePlay}
-          className="w-14 h-14 rounded-full flex items-center justify-center text-white shadow-xl hover:scale-105 transition-transform"
+          className="w-12 h-12 md:w-14 md:h-14 rounded-full flex items-center justify-center text-white shadow-xl hover:scale-105 transition-transform"
           style={{ background: 'var(--accent-gradient)', boxShadow: '0 12px 30px rgba(124, 58, 237, 0.4), 0 4px 10px rgba(0,0,0,0.38)' }}
           disabled={!ready}
         >
-          {playing ? <Pause size={24} fill="currentColor" /> : <Play size={24} fill="currentColor" className='translate-x-[1px]' />}
+          {playing ? <Pause size={24} fill="currentColor" /> : <Play size={24} fill="currentColor" className='translate-x-px' />}
         </button>
 
         <button title="Forward 10s" onClick={skipForward} disabled={!ready} className="text-muted-foreground hover:text-white transition-colors p-2">
-          <FastForward size={20} />
+          <FastForward size={18} />
         </button>
         <button title="Next Song" onClick={onSkipNext} disabled={!ready} className="text-muted-foreground hover:text-white transition-colors p-2">
           <FastForward size={24} />
         </button>
       </div>
 
-      {/* Volume Control */}
-      <div className="flex items-center gap-3 w-full max-w-xs mt-2">
+      {/* Volume Control (stack on small screens) */}
+      <div className="flex flex-col sm:flex-row items-center gap-3 w-full sm:max-w-xs mt-2">
         <button title={muted ? 'Unmute' : 'Mute'} onClick={toggleMute} disabled={!ready} className="text-muted-foreground hover:text-white transition-colors p-1">
           {muted || volume === 0 ? <VolumeX size={20} /> : <Volume2 size={20} />}
         </button>
@@ -413,7 +338,7 @@ const AudioPlayer = ({
           value={muted ? 0 : volume}
           onInput={handleVolumeChange}
           disabled={!ready}
-          className="flex-1 h-1 appearance-none bg-gray-700 rounded-full cursor-pointer"
+          className="flex-1 h-2 sm:h-1 appearance-none bg-gray-700 rounded-full cursor-pointer"
           style={{
             '--accent-color': activeColor,
             '--rail-color': 'rgba(255,255,255,0.25)',

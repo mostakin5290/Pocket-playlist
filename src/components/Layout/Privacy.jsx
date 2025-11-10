@@ -5,7 +5,7 @@ import Footer from './Footer'
 function Privacy() {
   return (
     <div className="min-h-screen bg-background text-foreground flex flex-col pt-[100px] md:pt-[120px] pb-12">
-        <Header />
+        
         <div className="flex-1 w-full max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="bg-card text-foreground rounded-xl md:rounded-2xl shadow-xl border border-border p-6 md:p-10 fade-up">
                 <h1 className='text-2xl md:text-3xl font-bold mb-2 text-center'>Privacy Policy</h1>
@@ -18,7 +18,6 @@ function Privacy() {
                 </div>
             </div>
         </div>
-        <Footer />
     </div>
 
   )

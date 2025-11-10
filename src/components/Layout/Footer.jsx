@@ -5,7 +5,7 @@ import { Link } from 'react-router-dom';
 const Footer = () => {
 
   return (
-    <footer className="w-full text-foreground">
+    <footer className="w-full bottom-0 text-foreground">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="relative rounded-2xl overflow-hidden">
           <BorderBeam borderWidth={6} size={60} />
@@ -16,11 +16,11 @@ const Footer = () => {
                 <div
                   className="w-10 h-10 rounded-full flex items-center justify-center"
                   style={{
-                    background: 'var(--accent-gradient)',
-                    boxShadow: '0 6px 20px rgba(255,30,168,0.28)'
+                    // background: 'var(--accent-gradient)',
+                    boxShadow: '0 6px 20px #9971d9aa',
                   }}
                 >
-                  <span className="text-white font-bold">PP</span>
+                  <img src="/logo.svg" alt="" />
                 </div>
                 <div>
                   <div className="text-lg font-semibold">Pocket Playlist</div>
@@ -31,7 +31,7 @@ const Footer = () => {
               <nav className="flex flex-col md:flex-row gap-3 md:gap-8 justify-center items-center">
                 <Link to='/about' className="text-sm text-muted-foreground hover:text-foreground transition">About us</Link>
                 <Link to="/privacy" className="text-sm text-muted-foreground hover:text-foreground transition">Privacy</Link>
-                <a href="#" className="text-sm text-muted-foreground hover:text-foreground transition">Help</a>
+                <a href="/help" className="text-sm text-muted-foreground hover:text-foreground transition">Help</a>
               </nav>
 
               <div className="text-sm text-muted-foreground text-center md:text-right">

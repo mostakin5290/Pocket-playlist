@@ -15,7 +15,7 @@ const Header = ({ mode = 'video', setMode = () => { } }) => {
   const idleClass = 'bg-card/10 text-foreground hover:bg-card/20'
 
   return (
-    <header className=" z-50 pointer-events-none">
+    <header className=" z-50 mt-5 top-0 pointer-events-none">
       <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
         <div className="relative rounded-3xl overflow-visible">
 
@@ -31,11 +31,12 @@ const Header = ({ mode = 'video', setMode = () => { } }) => {
                   <div
                     className="w-10 h-10 rounded-full flex items-center justify-center shrink-0"
                     style={{
-                      background: 'var(--accent-gradient)',
-                      boxShadow: '0 8px 30px rgba(255,30,168,0.36)',
+                      // background: 'var(--accent-gradient)',
+                      boxShadow: '0 6px 20px #9971d9aa',
+
                     }}
                   >
-                    <span className="text-white font-bold text-sm">PP</span>
+                    <img src="/logo.svg" alt="" />
                   </div>
                   <span className="font-semibold text-base md:text-lg whitespace-nowrap">Pocket Playlist</span>
                 </a>

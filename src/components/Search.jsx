@@ -16,7 +16,7 @@ const Search = ({ compact = false }) => {
         setError(null)
         setResults([])
         try {
-            const url = `https://www.googleapis.com/youtube/v3/search?part=snippet&type=video&maxResults=10&q=${encodeURIComponent(searchTerm)}&key=${API_KEY}`
+            const url = `https://www.googleapis.com/youtube/v3/search?part=snippet&type=video&maxResults=50&q=${encodeURIComponent(searchTerm)}&key=${API_KEY}`
             const res = await fetch(url)
             if (!res.ok) throw new Error(await res.text())
             const data = await res.json()
