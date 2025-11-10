@@ -55,7 +55,7 @@ const About = () => {
               <li>Click a track to play, or let the queue play continuously.</li>
             </ol>
 
-          <h2 className="text-2xl font-semibold mb-4">FAQ</h2>
+          <h2 className="text-2xl mt-15 font-semibold mb-4">FAQ</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <h4 className="font-medium">Do I need an account?</h4>
@@ -71,7 +71,7 @@ const About = () => {
             </div>
             <div>
               <h4 className="font-medium">How can I contribute?</h4>
-              <p className="text-sm text-muted-foreground mt-1">Contributions, bug reports, and feature requests are welcome on our GitHub repository — check the README for project links.</p>
+              <p className="text-sm text-muted-foreground mt-1">Contributions, bug reports, and feature requests are welcome on our GitHub repository. </p>
             </div>
           </div>
 
@@ -93,7 +93,6 @@ const About = () => {
           
         </section>
 
-        {/* FAQ + Contact */}
 
       </div>
 
