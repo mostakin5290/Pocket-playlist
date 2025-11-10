@@ -1,14 +1,14 @@
-import { FaFacebook, FaTwitter, FaInstagram } from "react-icons/fa";
+import { FaLinkedin, FaTwitter, FaInstagram } from "react-icons/fa";
 
-const ProfileCard = ({Fname}) => {
+const ProfileCard = ({Fname,Img,linkedin,x,instagram}) => {
   return (
     <div className="w-80 text-white bg-[#191622] rounded-2xl shadow-lg overflow-hidden transition-transform hover:scale-[1.02]">
       {/* Header */}
       <div className="h-64 overflow-hidden">
         <img
-          src="https://docs.material-tailwind.com/img/team-3.jpg"
+          src={Img}
           alt="Profile"
-          className="h-full w-full object-cover"
+          className="h-full w-full object-cover transform hover:scale-105 transition-transform"
         />
       </div>
 
@@ -22,21 +22,21 @@ const ProfileCard = ({Fname}) => {
         {/* Footer */}
         <div className="flex justify-center gap-6 text-xl text-gray-600">
           <a
-            href="#facebook"
+            href={linkedin}
             className="hover:text-blue-600 transition-colors"
-            title="Like on Facebook"
+            title="Like on LinkedIn"
           >
-            <FaFacebook />
+            <FaLinkedin />
           </a>
           <a
-            href="#twitter"
+            href={x}
             className="hover:text-sky-500 transition-colors"
-            title="Follow on Twitter"
+            title="Follow on X"
           >
             <FaTwitter />
           </a>
           <a
-            href="#instagram"
+            href={instagram}
             className="hover:text-pink-500 transition-colors"
             title="Follow on Instagram"
           >

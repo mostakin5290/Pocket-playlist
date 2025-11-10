@@ -85,9 +85,9 @@ const About = () => {
           <aside className="bg-card border border-border rounded-2xl p-6 shadow-lg">
             <h3 className='text-lg font-semibold mb-3'>Meet Our Team</h3>
             <div className='flex flex-col gap-3'>
-              <ProfileCard Fname="Mostakin Mondal" />
-              <ProfileCard Fname="Sandipan Pal" />
-              <ProfileCard Fname="Sk Asfar Ali" />
+              <ProfileCard Fname="Mostakin Mondal" Img="/mostakin.jpeg" linkedin="https://www.linkedin.com/in/mostakin-mondal-m42/" x="https://x.com/mostakin_42" instagram="https://www.instagram.com/mm__s_t_a_r_0842"/>
+              <ProfileCard Fname="Sandipan Pal" Img="/sandipan.png"/>
+              <ProfileCard Fname="Sk Asfar Ali" Img="/asfar.jpeg"/>
             </div>
           </aside>
           
