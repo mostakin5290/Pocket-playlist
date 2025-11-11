@@ -20,7 +20,7 @@ const Footer = () => {
                     boxShadow: '0 6px 20px #9971d9aa',
                   }}
                 >
-                  <img src="/logo.svg" alt="" />
+                <Link to="/"> <img src="/logo.svg" alt="" /> </Link>
                 </div>
                 <div>
                   <div className="text-lg font-semibold">Pocket Playlist</div>
