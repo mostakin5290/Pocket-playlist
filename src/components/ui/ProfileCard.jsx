@@ -47,16 +47,6 @@ const ProfileCard = ({ Fname = "User", Img, linkedin = "#", x = "#", instagram =
             <BsTwitterX />
           </a>
 
-          <a
-            href={instagram}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="hover:text-pink-500 transition-colors"
-            aria-label="Instagram"
-            title="Instagram"
-          >
-            <FaInstagram />
-          </a>
         </div>
       </div>
     </div>
