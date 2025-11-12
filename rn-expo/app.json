@@ -1,0 +1,19 @@
+{
+  "expo": {
+    "name": "pocket-playlist-expo",
+    "slug": "pocket-playlist-expo",
+    "version": "0.0.1",
+    "sdkVersion": "48.0.0",
+    "platforms": [
+      "ios",
+      "android",
+      "web"
+    ],
+    "android": {
+      "package": "com.anonymous.pocketplaylistexpo"
+    },
+    "ios": {
+      "bundleIdentifier": "com.anonymous.pocketplaylistexpo"
+    }
+  }
+}

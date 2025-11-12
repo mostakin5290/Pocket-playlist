@@ -1,40 +1,28 @@
 import React from 'react';
-import { SafeAreaView, StyleSheet, Text, View } from 'react-native';
-import { StatusBar } from 'expo-status-bar';
+import { NavigationContainer } from '@react-navigation/native';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import PlaylistScreen from './src/screens/PlaylistScreen';
+import PlayerScreen from './src/screens/PlayerScreen';
+import HomeScreen from './src/screens/HomeScreen';
+import HelpScreen from './src/screens/HelpScreen';
+
+const Stack = createNativeStackNavigator();
 
 export default function App() {
-  return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.card}>
-        <Text style={styles.title}>Pocket Playlist (Expo Demo)</Text>
-        <Text style={styles.subtitle}>This is a starter shell. I'll port audio & playlist screens next.</Text>
-      </View>
-      <StatusBar style="light" />
-    </SafeAreaView>
-  );
+    return (
+        <NavigationContainer>
+            <Stack.Navigator
+                initialRouteName="Home"
+                screenOptions={{
+                    headerStyle: { backgroundColor: '#0b1220' },
+                    headerTintColor: '#fff'
+                }}
+            >
+                <Stack.Screen name="Home" component={HomeScreen} options={{ title: 'Pocket Playlist' }} />
+                <Stack.Screen name="Playlist" component={PlaylistScreen} options={{ title: 'Playlist' }} />
+                <Stack.Screen name="Player" component={PlayerScreen} options={{ title: 'Player' }} />
+                <Stack.Screen name="Help" component={HelpScreen} options={{ title: 'Help' }} />
+            </Stack.Navigator>
+        </NavigationContainer>
+    );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#0b1220',
-    alignItems: 'center',
-    justifyContent: 'center'
-  },
-  card: {
-    padding: 20,
-    borderRadius: 14,
-    backgroundColor: '#11121A',
-    width: '90%'
-  },
-  title: {
-    color: '#FFFFFF',
-    fontSize: 20,
-    fontWeight: '700',
-    marginBottom: 8
-  },
-  subtitle: {
-    color: '#9CA3AF',
-    fontSize: 14
-  }
-});
