@@ -70,7 +70,7 @@ const AudioPlayer = ({
             try {
               const info = p.getVideoData && p.getVideoData();
               if (info && info.title) setTitleText(info.title);
-            } catch (err) { /* ignore */ }
+            } catch { /* ignore */ }
           }, 500);
         },
         onStateChange: (ev) => {
@@ -86,7 +86,8 @@ const AudioPlayer = ({
           } else if (ev.data === STATES.BUFFERING) {
             setBuffering(true);
           } else if (ev.data === STATES.CUED) {
-            if (playing) p.playVideo();
+            // when cued, try to resume playing if we were playing before
+            try { if (playing && ev && ev.target && typeof ev.target.playVideo === 'function') ev.target.playVideo(); } catch { /* ignore */ }
           }
         },
         onError: (e) => {
@@ -99,7 +100,7 @@ const AudioPlayer = ({
       }
     }).then((player) => {
       if (!mounted) {
-        try { player.destroy(); } catch (e) { }
+        try { player.destroy(); } catch { /* ignore */ }
         return;
       }
       playerRef.current = player;
@@ -162,9 +163,7 @@ const AudioPlayer = ({
         setCurrentTime(playerRef.current.getCurrentTime());
         setDuration(playerRef.current.getDuration());
         if (playerRef.current.isMuted() !== muted) setMuted(playerRef.current.isMuted());
-      } catch (e) {
-        if (tickRef.current) clearInterval(tickRef.current);
-      }
+      } catch { if (tickRef.current) clearInterval(tickRef.current); }
     }, 500);
     return () => {
       if (tickRef.current) clearInterval(tickRef.current);
@@ -173,6 +172,62 @@ const AudioPlayer = ({
 
   // Lightweight: avoid complex MediaSession and visibility handling here to keep player logic focused
   // (This keeps the component smaller and more predictable across browsers/devices.)
+
+  // Media Session: set metadata and basic handlers so lock-screen / notification controls can work where supported.
+  useEffect(() => {
+    if (!('mediaSession' in navigator)) return undefined;
+    const updateSession = () => {
+      try {
+        const artworkSrc = videoThumbnail || `https://i.ytimg.com/vi/${videoId}/mqdefault.jpg`;
+        navigator.mediaSession.metadata = new window.MediaMetadata({
+          title: titleText || videoTitle,
+          artist: '',
+          album: '',
+          artwork: [
+            { src: artworkSrc, sizes: '96x96', type: 'image/png' },
+            { src: artworkSrc, sizes: '192x192', type: 'image/png' },
+            { src: artworkSrc, sizes: '512x512', type: 'image/png' }
+          ]
+        });
+
+        navigator.mediaSession.setActionHandler('play', () => {
+          try { playerRef.current && playerRef.current.playVideo && playerRef.current.playVideo(); } catch { /* ignore */ }
+        });
+        navigator.mediaSession.setActionHandler('pause', () => {
+          try { playerRef.current && playerRef.current.pauseVideo && playerRef.current.pauseVideo(); } catch { /* ignore */ }
+        });
+        navigator.mediaSession.setActionHandler('seekto', (details) => {
+          try {
+            if (details && typeof details.seekTime === 'number' && playerRef.current && playerRef.current.seekTo) {
+              playerRef.current.seekTo(details.seekTime, true);
+            }
+          } catch { /* ignore */ }
+        });
+        navigator.mediaSession.setActionHandler('previoustrack', () => { if (typeof onSkipPrev === 'function') onSkipPrev(); });
+        navigator.mediaSession.setActionHandler('nexttrack', () => { if (typeof onSkipNext === 'function') onSkipNext(); });
+      } catch (e) {
+        // ignore
+      }
+    };
+
+    updateSession();
+    return () => {
+      try {
+        ['play', 'pause', 'seekto', 'previoustrack', 'nexttrack'].forEach(a => {
+          try { navigator.mediaSession.setActionHandler(a, null); } catch { /* ignore */ }
+        });
+      } catch { /* ignore */ }
+    };
+  }, [titleText, videoThumbnail, videoId, videoTitle, onSkipNext, onSkipPrev]);
+
+  // Listen for a user gesture event (dispatched by TapToStart) to attempt playback
+  useEffect(() => {
+    const onGesture = () => {
+      try { if (playerRef.current && playerRef.current.playVideo) playerRef.current.playVideo(); } catch { }
+    }
+    window.addEventListener('pp:user-gesture', onGesture)
+    return () => window.removeEventListener('pp:user-gesture', onGesture)
+  }, [])
 
   // Controls
   const togglePlay = useCallback(() => {

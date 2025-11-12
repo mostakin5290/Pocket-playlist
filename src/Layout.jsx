@@ -1,9 +1,12 @@
 import React, { useEffect, useState, useCallback } from 'react'
-import { nanoid } from 'nanoid' 
+import { nanoid } from 'nanoid'
 import YTPlayer from './components/Player/YTPlayer'
 import AudioPlayer from './components/Player/AudioPlayer'
 import SongList from './components/SongList'
 import Header from './components/Layout/Header'
+import InstallPrompt from './components/ui/InstallPrompt'
+import IOSInstallHint from './components/ui/IOSInstallHint'
+import TapToStart from './components/ui/TapToStart'
 
 const DEFAULT_PLAYLIST_ID = 'default-playlist'
 
@@ -12,7 +15,7 @@ const Layout = () => {
     const [mode, setMode] = useState('video')
 
     const [playlists, setPlaylists] = useState(() => {
-        const saved = localStorage.getItem('playlistsV2') 
+        const saved = localStorage.getItem('playlistsV2')
         try {
             const parsed = saved ? JSON.parse(saved) : {}
             if (Object.keys(parsed).length === 0) {
@@ -30,7 +33,7 @@ const Layout = () => {
         return initialId;
     })
     const [currentIndex, setCurrentIndex] = useState(0)
-    const [currentVideoId, setCurrentVideoId] = useState(null) 
+    const [currentVideoId, setCurrentVideoId] = useState(null)
     const API_KEY = import.meta.env.VITE_YT_API || import.meta.env.vite_YT_API
 
     const activePlaylist = playlists[activePlaylistId] || playlists[DEFAULT_PLAYLIST_ID]
@@ -103,7 +106,7 @@ const Layout = () => {
                 setCurrentIndex(firstNewIndex)
                 setCurrentVideoId(null)
             }
-            
+
             return newPlaylists
         })
     }, [activePlaylistId])
@@ -124,7 +127,7 @@ const Layout = () => {
                 thumbnail: itemRaw.snippet.thumbnails?.medium?.url || itemRaw.snippet.thumbnails?.default?.url,
                 channel: itemRaw.snippet.channelTitle,
             }
-            
+
             addSongsToPlaylist([item], playlistId, autoPlay)
             return item
         } catch (err) {
@@ -193,7 +196,7 @@ const Layout = () => {
         setCurrentIndex(idx)
         setCurrentVideoId(null)
     }
-    
+
 
     const handleEnded = useCallback(() => {
         const currentItems = activePlaylist?.items || []
@@ -201,7 +204,7 @@ const Layout = () => {
             setCurrentIndex(prev => (prev < currentItems.length - 1 ? prev + 1 : 0))
             setCurrentVideoId(null)
         } else {
-            setCurrentVideoId('EmsRACUM4V4') 
+            setCurrentVideoId('EmsRACUM4V4')
         }
     }, [activePlaylist])
 
@@ -234,13 +237,13 @@ const Layout = () => {
             if (!item || !item.id) return
 
             setCurrentVideoId(item.id)
-            
+
             const activeItems = activePlaylist?.items || []
             const existingIndex = activeItems.findIndex(p => p.id === item.id)
             if (existingIndex !== -1) {
                 setCurrentIndex(existingIndex)
             } else {
-                 addSongsToPlaylist([item], activePlaylistId, false)
+                addSongsToPlaylist([item], activePlaylistId, false)
             }
         }
 
@@ -296,21 +299,19 @@ const Layout = () => {
             alert("The default playlist cannot be deleted.")
             return
         }
-        
+
         if (!window.confirm(`Are you sure you want to delete playlist "${playlists[idToDelete]?.name}"? This action cannot be undone.`)) return
 
         setPlaylists(prev => {
             const newPlaylists = { ...prev };
             delete newPlaylists[idToDelete];
 
-            let newActiveId = activePlaylistId;
             if (activePlaylistId === idToDelete) {
-                newActiveId = DEFAULT_PLAYLIST_ID;
-                setActivePlaylistId(DEFAULT_PLAYLIST_ID); 
+                setActivePlaylistId(DEFAULT_PLAYLIST_ID);
                 setCurrentIndex(0);
                 setCurrentVideoId(null);
             }
-            
+
             return newPlaylists;
         });
     }, [activePlaylistId, playlists])
@@ -321,7 +322,7 @@ const Layout = () => {
         setCurrentIndex(0)
         setCurrentVideoId(null)
     }, [])
-    
+
     const playerTitle = currentVideoId ? 'Direct Play' : currentSong?.title || 'Pocket Playlist'
     const playerThumbnail = currentVideoId ? (currentSong?.thumbnail || `https://i.ytimg.com/vi/${currentVideoId}/mqdefault.jpg`) : currentSong?.thumbnail
 
@@ -371,6 +372,9 @@ const Layout = () => {
                     </aside>
                 </div>
             </div>
+            <InstallPrompt />
+            <IOSInstallHint />
+            <TapToStart />
         </>
     )
 }

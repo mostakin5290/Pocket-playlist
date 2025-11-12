@@ -30,7 +30,7 @@ const YTPlayer = ({ videoId = 'EmsRACUM4V4', onEnd = null, title = 'YouTube play
                     if (!mounted) return
                     readyRef.current = true
                     setReady(true)
-                    try { ev.target.loadVideoById(videoId); ev.target.playVideo && ev.target.playVideo() } catch (e) { }
+                    try { ev.target.loadVideoById(videoId); ev.target.playVideo && ev.target.playVideo() } catch { /* ignore */ }
                 },
                 onStateChange: (ev) => {
                     const ENDED = window.YT && window.YT.PlayerState ? window.YT.PlayerState.ENDED : 0
@@ -41,7 +41,7 @@ const YTPlayer = ({ videoId = 'EmsRACUM4V4', onEnd = null, title = 'YouTube play
                 }
             }
         }).then(player => {
-            if (!mounted) { try { player.destroy() } catch (e) { }; return }
+            if (!mounted) { try { player.destroy() } catch { /* ignore */ }; return }
             playerRef.current = player
         }).catch(e => console.warn('YTPlayer create error', e))
 
@@ -56,9 +56,18 @@ const YTPlayer = ({ videoId = 'EmsRACUM4V4', onEnd = null, title = 'YouTube play
         try {
             if (!p || !readyRef.current) return
             // Load and play the new videoId
-            try { p.loadVideoById(videoId); p.playVideo && p.playVideo() } catch (e) { }
+            try { p.loadVideoById(videoId); p.playVideo && p.playVideo() } catch { /* ignore */ }
         } catch (e) { console.warn('YTPlayer update error', e) }
     }, [videoId])
+
+    // Listen for the user gesture event so we can start playback when user taps the overlay
+    useEffect(() => {
+        const onGesture = () => {
+            try { if (playerRef.current && playerRef.current.playVideo) playerRef.current.playVideo(); } catch { }
+        }
+        window.addEventListener('pp:user-gesture', onGesture)
+        return () => window.removeEventListener('pp:user-gesture', onGesture)
+    }, [])
 
     return (
         <div className="relative w-full mt-10 rounded-2xl">

@@ -1,6 +1,6 @@
 import { FaLinkedin, FaInstagram } from "react-icons/fa";
 import { BsTwitterX } from "react-icons/bs";
-const ProfileCard = ({ Fname = "User", Img, linkedin = "#", x = "#", instagram = "#" }) => {
+const ProfileCard = ({ Fname = "User", Img, linkedin = "#", x = "#" }) => {
   return (
     <div className="w-80 text-white bg-[#191622] rounded-2xl shadow-lg overflow-hidden transition-transform hover:scale-[1.02]">
       {/* Header */}

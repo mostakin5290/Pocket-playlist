@@ -35,7 +35,29 @@ export async function createPlayer(containerId, options = {}) {
     const cfg = Object.assign({}, options, {
         playerVars: Object.assign({}, options.playerVars || {}, { origin: window.location.origin })
     });
-    return new YT.Player(containerId, cfg);
+    const player = new YT.Player(containerId, cfg);
+
+    // Ensure iframe has proper allow attributes (autoplay, encrypted-media, picture-in-picture)
+    // Wait until iframe is available then set attributes — this helps with background playback on some browsers
+    try {
+        const waitForIframe = setInterval(() => {
+            try {
+                const iframe = player && typeof player.getIframe === 'function' ? player.getIframe() : null;
+                if (iframe) {
+                    iframe.setAttribute('allow', 'autoplay; encrypted-media; picture-in-picture');
+                    iframe.setAttribute('allowfullscreen', '');
+                    // some browsers respect allow attribute on iframe; stop waiting
+                    clearInterval(waitForIframe);
+                }
+            } catch {
+                // ignore and retry
+            }
+        }, 200);
+    } catch {
+        // ignore
+    }
+
+    return player;
 }
 
 export default { ensureYT, createPlayer };

@@ -44,7 +44,7 @@ const Search = ({ compact = false }) => {
     const handleAction = useCallback((item, actionType) => {
         try {
             window.dispatchEvent(new CustomEvent(`pp:search-${actionType}`, { detail: item }))
-        } catch (e) { /* ignore */ }
+        } catch { /* ignore */ }
         // For smoother UX, hide results only on Play action, keep visible on Add
         if (actionType === 'play') setShowResults(false)
     }, [])
@@ -53,7 +53,7 @@ const Search = ({ compact = false }) => {
     const handleAdd = useCallback((item) => handleAction(item, 'add'), [handleAction])
 
     // --- UI/UX State and Handlers ---
-    
+
     const [showResults, setShowResults] = useState(false)
     const containerRef = useRef(null)
     const [selectedIndex, setSelectedIndex] = useState(-1)
@@ -118,7 +118,7 @@ const Search = ({ compact = false }) => {
             }
         }
     }
-    
+
     return (
         <div ref={containerRef} className={`w-full ${compact ? 'flex items-center' : 'flex flex-col items-center'} relative`}>
             <form onSubmit={onSubmit} className={`w-full flex items-center ${compact ? '' : 'justify-center'}`}>
@@ -128,7 +128,7 @@ const Search = ({ compact = false }) => {
                         value={q}
                         onChange={(e) => {
                             setQ(e.target.value)
-                            if(e.target.value.length > 2) searchYouTube(e.target.value) // Live search after 3 chars
+                            if (e.target.value.length > 2) searchYouTube(e.target.value) // Live search after 3 chars
                         }}
                         onFocus={() => setShowResults(true)}
                         type="search"
