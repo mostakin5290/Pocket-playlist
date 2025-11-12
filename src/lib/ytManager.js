@@ -44,8 +44,11 @@ export async function createPlayer(containerId, options = {}) {
             try {
                 const iframe = player && typeof player.getIframe === 'function' ? player.getIframe() : null;
                 if (iframe) {
-                    iframe.setAttribute('allow', 'autoplay; encrypted-media; picture-in-picture');
+                    // Broaden allow attributes to improve chances of background playback / autoplay
+                    iframe.setAttribute('allow', 'autoplay; encrypted-media; picture-in-picture; fullscreen');
                     iframe.setAttribute('allowfullscreen', '');
+                    // also hint that the iframe can play inline
+                    iframe.setAttribute('playsinline', '');
                     // some browsers respect allow attribute on iframe; stop waiting
                     clearInterval(waitForIframe);
                 }

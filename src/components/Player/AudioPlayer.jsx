@@ -19,6 +19,7 @@ const AudioPlayer = ({
   const [duration, setDuration] = useState(0);
   const [currentTime, setCurrentTime] = useState(0);
   const [volume, setVolume] = useState(70);
+  const volumeRef = useRef(volume);
   const [muted, setMuted] = useState(false);
   const [buffering, setBuffering] = useState(false);
   const [titleText, setTitleText] = useState(videoTitle);
@@ -26,6 +27,10 @@ const AudioPlayer = ({
   useEffect(() => {
     setTitleText(videoTitle);
   }, [videoTitle]);
+
+  useEffect(() => {
+    volumeRef.current = volume;
+  }, [volume]);
 
   // Player setup and teardown
   useEffect(() => {
@@ -60,7 +65,7 @@ const AudioPlayer = ({
         onReady: (e) => {
           setReady(true);
           const p = e.target;
-          p.setVolume(volume);
+          p.setVolume(volumeRef.current);
           p.mute();
           p.playVideo();
           setTimeout(() => {
@@ -137,16 +142,16 @@ const AudioPlayer = ({
               // Player doesn't expose expected API yet — log and skip to avoid TypeError
               console.warn('AudioPlayer: YT player instance does not expose loadVideoById/cueVideoById yet', p);
             }
-          } catch (e) {
-            console.warn('AudioPlayer video update error', e);
+          } catch {
+            void 0;
           }
         } else if (tries < 6) {
           tries += 1;
           // retry after a short delay — handles timing issues in dev/StrictMode
           setTimeout(tryLoad, 200);
         }
-      } catch (e) {
-        console.warn('AudioPlayer video load guard error', e);
+      } catch {
+        void 0;
       }
     };
 
@@ -191,22 +196,29 @@ const AudioPlayer = ({
         });
 
         navigator.mediaSession.setActionHandler('play', () => {
-          try { playerRef.current && playerRef.current.playVideo && playerRef.current.playVideo(); } catch { /* ignore */ }
+          try { playerRef.current && playerRef.current.playVideo && playerRef.current.playVideo(); } catch { void 0; }
         });
         navigator.mediaSession.setActionHandler('pause', () => {
-          try { playerRef.current && playerRef.current.pauseVideo && playerRef.current.pauseVideo(); } catch { /* ignore */ }
+          try { playerRef.current && playerRef.current.pauseVideo && playerRef.current.pauseVideo(); } catch { void 0; }
         });
         navigator.mediaSession.setActionHandler('seekto', (details) => {
           try {
             if (details && typeof details.seekTime === 'number' && playerRef.current && playerRef.current.seekTo) {
               playerRef.current.seekTo(details.seekTime, true);
             }
-          } catch { /* ignore */ }
+          } catch { void 0; }
         });
         navigator.mediaSession.setActionHandler('previoustrack', () => { if (typeof onSkipPrev === 'function') onSkipPrev(); });
         navigator.mediaSession.setActionHandler('nexttrack', () => { if (typeof onSkipNext === 'function') onSkipNext(); });
-      } catch (e) {
-        // ignore
+        // Keep playbackState in-sync so platforms that expose a media notification
+        // (Android Chrome when PWA-installed, etc.) show correct status.
+        try {
+          navigator.mediaSession.playbackState = playing ? 'playing' : 'paused';
+        } catch {
+          void 0;
+        }
+      } catch {
+        void 0;
       }
     };
 
@@ -216,9 +228,33 @@ const AudioPlayer = ({
         ['play', 'pause', 'seekto', 'previoustrack', 'nexttrack'].forEach(a => {
           try { navigator.mediaSession.setActionHandler(a, null); } catch { /* ignore */ }
         });
-      } catch { /* ignore */ }
+      } catch { void 0; }
     };
   }, [titleText, videoThumbnail, videoId, videoTitle, onSkipNext, onSkipPrev]);
+
+  // Try to recover playback after visibility changes (e.g. screen lock/unlock).
+  // Note: browsers / OS may suspend playback on lock and not allow JS to resume
+  // while the page is hidden. This handler attempts to resume when the page
+  // becomes visible again (unlock), which helps in many cases.
+  useEffect(() => {
+    const onVisibility = () => {
+      try {
+        if (document.visibilityState === 'visible') {
+          // If we were playing before, try to resume.
+          if (playing && playerRef.current && typeof playerRef.current.playVideo === 'function') {
+            playerRef.current.playVideo();
+          }
+          // restore mediaSession playbackState for good measure
+          try { if ('mediaSession' in navigator) navigator.mediaSession.playbackState = playing ? 'playing' : 'paused'; } catch { }
+        }
+      } catch (e) {
+        // ignore
+      }
+    };
+
+    document.addEventListener('visibilitychange', onVisibility);
+    return () => document.removeEventListener('visibilitychange', onVisibility);
+  }, [playing]);
 
   // Listen for a user gesture event (dispatched by TapToStart) to attempt playback
   useEffect(() => {
