@@ -6,7 +6,6 @@ import SongList from './components/SongList'
 import Header from './components/Layout/Header'
 import InstallPrompt from './components/ui/InstallPrompt'
 import IOSInstallHint from './components/ui/IOSInstallHint'
-import TapToStart from './components/ui/TapToStart'
 
 const DEFAULT_PLAYLIST_ID = 'default-playlist'
 
@@ -374,7 +373,6 @@ const Layout = () => {
             </div>
             <InstallPrompt />
             <IOSInstallHint />
-            <TapToStart />
         </>
     )
 }
