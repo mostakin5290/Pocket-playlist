@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, FlatList, TouchableOpacity, TextInput, KeyboardAvoidingView, Platform } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import trackManager from '../src/lib/trackManager';
 
 const STORAGE_KEY = 'pp:playlists';
 
@@ -71,7 +72,10 @@ export default function PlaylistScreen({ navigation }) {
                         <TouchableOpacity style={{ flex: 1 }} onPress={() => play(item)}>
                             <Text style={styles.rowTitle} numberOfLines={1}>{item.title}</Text>
                         </TouchableOpacity>
-                        <TouchableOpacity onPress={() => remove(item.id)} style={styles.delBtn}><Text style={styles.delText}>Delete</Text></TouchableOpacity>
+                                <TouchableOpacity onPress={() => remove(item.id)} style={styles.delBtn}><Text style={styles.delText}>Delete</Text></TouchableOpacity>
+                                <TouchableOpacity onPress={() => trackManager.playUrl(item.src, { title: item.title })} style={styles.playNativeBtn}>
+                                    <Text style={styles.playNativeText}>Play (native)</Text>
+                                </TouchableOpacity>
                     </View>
                 )}
             />
@@ -90,6 +94,8 @@ const styles = StyleSheet.create({
     addText: { color: '#fff', fontWeight: '600' },
     row: { flexDirection: 'row', alignItems: 'center', padding: 12, backgroundColor: '#0f1724', borderRadius: 8, marginBottom: 8 },
     rowTitle: { color: '#fff' },
-    delBtn: { marginLeft: 12, paddingHorizontal: 10, paddingVertical: 6, borderRadius: 6, backgroundColor: '#2b2b2b' },
-    delText: { color: '#fff' }
+        delBtn: { marginLeft: 12, paddingHorizontal: 10, paddingVertical: 6, borderRadius: 6, backgroundColor: '#2b2b2b' },
+        delText: { color: '#fff' },
+        playNativeBtn: { marginLeft: 8, paddingHorizontal: 8, paddingVertical: 6, borderRadius: 6, backgroundColor: '#2563EB' },
+        playNativeText: { color: '#fff' }
 });
