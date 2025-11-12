@@ -5,7 +5,6 @@ const isMobile = () => /Mobi|Android/i.test(navigator.userAgent || '')
 const InstallPrompt = () => {
     const [deferredPrompt, setDeferredPrompt] = useState(null)
     const [visible, setVisible] = useState(false)
-    const [imgError, setImgError] = useState(false)
 
     useEffect(() => {
         const dismissed = localStorage.getItem('pp:install-dismissed')
@@ -35,8 +34,8 @@ const InstallPrompt = () => {
             } else {
                 localStorage.setItem('pp:install-dismissed', Date.now())
             }
-        } catch {
-            void 0;
+        } catch (e) {
+            // ignore
         }
         setVisible(false)
         setDeferredPrompt(null)
@@ -48,33 +47,16 @@ const InstallPrompt = () => {
     }
 
     return (
-        <div className="fixed bottom-6 left-1/2 transform -translate-x-1/2 z-50 pointer-events-auto">
-            <div className="w-full max-w-xs bg-card border border-border px-3 py-3 rounded-2xl shadow-xl flex items-center gap-4">
-                <div className="shrink-0">
-                    {!imgError ? (
-                        <img
-                            src="/logo.svg"
-                            alt="Pocket Playlist"
-                            className="w-12 h-12 rounded-lg object-contain"
-                            onError={() => setImgError(true)}
-                        />
-                    ) : (
-                        <img
-                            src="/icons/icon-192.png"
-                            alt="Pocket Playlist"
-                            className="w-12 h-12 rounded-lg object-cover"
-                        />
-                    )}
+        <div className="fixed bottom-6 left-1/2 transform -translate-x-1/2 z-50">
+            <div className="flex items-center gap-3 bg-card border border-border px-3 py-2 rounded-full shadow-lg">
+                <img src="/icons/icon-192.png" alt="Pocket Playlist" className="w-10 h-10 rounded-md" />
+                <div className="flex flex-col">
+                    <div className="text-sm font-medium">Pocket Playlist</div>
+                    <div className="text-xs text-muted">Install for better background playback</div>
                 </div>
-
-                <div className="flex-1 min-w-0">
-                    <div className="text-sm font-semibold text-white leading-tight truncate">Pocket Playlist</div>
-                    {/* <div className="text-xs text-muted-foreground leading-tight mt-1">Install for better background playback</div> */}
-                </div>
-
-                <div className="flex items-center gap-3">
-                    <button onClick={onInstall} className="px-4 py-1.5 rounded-lg bg-primary text-white text-sm">Install</button>
-                    <button onClick={onDismiss} aria-label="Dismiss" className="text-sm text-muted-foreground px-2 py-1">Close</button>
+                <div className="ml-3 flex items-center gap-2">
+                    <button onClick={onInstall} className="px-3 py-1 rounded-full bg-primary text-white text-sm">Install</button>
+                    <button onClick={onDismiss} aria-label="Dismiss" className="text-sm px-2 py-1">Close</button>
                 </div>
             </div>
         </div>
