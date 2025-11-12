@@ -1,4 +1,9 @@
 {
+  "build": {
+    "env": {
+      "NPM_CONFIG_LEGACY_PEER_DEPS": "true"
+    }
+  },
   "headers": [
     {
       "source": "/assets/(.*)",
@@ -24,6 +29,12 @@
     {
       "source": "/icons/(.*)",
       "headers": [{ "key": "Access-Control-Allow-Origin", "value": "*" }]
+    }
+  ],
+  "rewrites": [
+    {
+      "source": "/(.*)",
+      "destination": "/"
     }
   ]
 }
