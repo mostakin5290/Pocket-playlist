@@ -42,7 +42,7 @@ self.addEventListener('fetch', (event) => {
             fetch(event.request).then((response) => {
                 // Update cache for navigations so subsequent offline visits can show latest HTML
                 const copy = response.clone();
-                caches.open(CACHE_NAME).then(cache => cache.put(event.request, copy)).catch(() => {});
+                caches.open(CACHE_NAME).then(cache => cache.put(event.request, copy)).catch(() => { });
                 return response;
             }).catch(() => caches.match(event.request).then(cached => cached || caches.match('/offline.html')))
         );
@@ -60,7 +60,7 @@ self.addEventListener('fetch', (event) => {
                     const reqUrl = new URL(event.request.url);
                     if (reqUrl.origin === self.location.origin) {
                         const copy = response.clone();
-                        caches.open(CACHE_NAME).then(cache => cache.put(event.request, copy)).catch(() => {});
+                        caches.open(CACHE_NAME).then(cache => cache.put(event.request, copy)).catch(() => { });
                     }
                 } catch (e) {
                     // noop
