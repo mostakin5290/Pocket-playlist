@@ -15,6 +15,7 @@ const Footer = () => {
               <div className="flex items-center  gap-3">
                 <div
                   className="w-10 h-10 rounded-full flex items-center justify-center"
+                  
                   style={{
                     // background: 'var(--accent-gradient)',
                     boxShadow: '0 6px 20px #9971d9aa',
